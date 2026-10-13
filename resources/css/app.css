@@ -1,0 +1,14 @@
+/* Plus Jakarta Sans, dipasang via npm (self-hosted, bukan CDN) -- lihat tailwind.config.js */
+@import '@fontsource-variable/plus-jakarta-sans';
+/* Style Tom Select (dropdown pencarian arsip), dipasang via npm -- lihat resources/js/app.js */
+@import 'tom-select/dist/css/tom-select.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Supaya elemen x-cloak tersembunyi sebelum Alpine.js siap (mencegah "kedip"
+   ikon spinner/normal yang saling tumpang tindih sepersekian detik). */
+[x-cloak] {
+    display: none !important;
+}
