@@ -175,7 +175,10 @@ class ArsipController extends Controller
 
         abort_unless($arsip->file_dokumen && Storage::disk(self::DISK)->exists($relativePath), 404);
 
-        return Storage::disk(self::DISK)->response($relativePath, null, [
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        $disk = Storage::disk(self::DISK);
+
+        return response()->file($disk->path($relativePath), [
             'X-Content-Type-Options' => 'nosniff',
         ]);
     }

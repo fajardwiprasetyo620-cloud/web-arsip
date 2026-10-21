@@ -42,7 +42,7 @@ class ArsipFileDokumenTest extends TestCase
         $arsip = Arsip::where('kode_berkas', 'BERKAS-001')->first();
         $this->assertNotNull($arsip);
         $this->assertNotNull($arsip->file_dokumen);
-        Storage::disk('local')->assertExists('arsip_digital/' . $arsip->file_dokumen);
+        $this->assertTrue(Storage::disk('local')->exists('arsip_digital/' . $arsip->file_dokumen));
     }
 
     public function test_hapus_file_dokumen_lewat_edit(): void
@@ -73,7 +73,7 @@ class ArsipFileDokumenTest extends TestCase
 
         $arsip->refresh();
         $this->assertNull($arsip->file_dokumen);
-        Storage::disk('local')->assertMissing('arsip_digital/' . $namaFile);
+        $this->assertFalse(Storage::disk('local')->exists('arsip_digital/' . $namaFile));
     }
 
     public function test_akses_file_dokumen_privat_oleh_admin(): void
@@ -90,7 +90,18 @@ class ArsipFileDokumenTest extends TestCase
 
         // Admin yang login bisa mengakses file
         $response = $this->actingAs($this->admin)->get(route('arsip.file', $arsip));
-        $response->assertOk();
+        $response->assertOk()
+            ->assertHeader('X-Content-Type-Options', 'nosniff');
+    }
+
+    public function test_akses_file_dokumen_yang_tidak_ada_menghasilkan_not_found(): void
+    {
+        $arsip = Arsip::factory()->create([
+            'file_dokumen' => 'file-tidak-ada.pdf',
+        ]);
+
+        $this->actingAs($this->admin)
+            ->get(route('arsip.file', $arsip))
+            ->assertNotFound();
     }
 }
-
