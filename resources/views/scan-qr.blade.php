@@ -50,10 +50,18 @@
                     </div>
                     <h3 class="font-bold text-base text-white">Siap Memindai QR Code</h3>
                     <p class="text-xs text-slate-300 mt-1 max-w-xs">Izinkan akses kamera browser Anda untuk mulai memindai label QR arsip.</p>
-                    <button type="button" id="btn-start" onclick="startScanner()" class="mt-5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg transition flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        Aktifkan Kamera
-                    </button>
+
+                    <div class="mt-5 flex flex-col sm:flex-row gap-2.5 w-full max-w-xs justify-center">
+                        <button type="button" id="btn-start" onclick="startScanner()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-5 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <span>Aktifkan Kamera</span>
+                        </button>
+
+                        <button type="button" onclick="document.getElementById('qr-input-file').click()" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2 text-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <span>Foto / Galeri HP</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -127,7 +135,42 @@
                 btnStop.classList.remove('hidden');
             }).catch(err => {
                 console.error("Gagal membuka kamera:", err);
-                alert("Tidak dapat mengakses kamera: " + (err.message || err));
+                const errMsg = err.message || String(err);
+
+                if (!window.isSecureContext) {
+                    if (window.Swal) {
+                        Swal.fire({
+                            title: 'Kamera live memerlukan koneksi aman',
+                            text: 'Browser biasanya membatasi akses kamera pada alamat HTTP melalui IP lokal. Coba HTTPS atau localhost, atau pilih foto QR jika fitur tersebut didukung perangkat.',
+                            icon: 'info',
+                            showCancelButton: true,
+                            confirmButtonColor: '#059669',
+                            cancelButtonColor: '#94a3b8',
+                            confirmButtonText: 'Ambil Foto QR',
+                            cancelButtonText: 'Tutup',
+                            customClass: { popup: 'rounded-2xl' }
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                document.getElementById('qr-input-file').click();
+                            }
+                        });
+                    } else {
+                        alert("Kamera live biasanya memerlukan HTTPS atau localhost. Anda dapat mencoba scan dari foto jika fitur tersebut didukung perangkat.");
+                    }
+                } else {
+                    const message = `Tidak dapat membuka kamera (${errMsg}). Periksa izin kamera browser dan pastikan kamera tidak sedang digunakan aplikasi lain. Anda juga dapat mencoba scan dari foto.`;
+                    if (window.Swal) {
+                        Swal.fire({
+                            title: 'Kamera tidak tersedia',
+                            text: message,
+                            icon: 'warning',
+                            confirmButtonColor: '#059669',
+                            customClass: { popup: 'rounded-2xl' }
+                        });
+                    } else {
+                        alert(message);
+                    }
+                }
             });
         }
 
@@ -180,10 +223,19 @@
                     onScanSuccess(decodedText);
                 })
                 .catch(err => {
-                    alert("QR Code tidak terbaca dari gambar ini. Pastikan gambar cukup jelas.");
+                    if (window.Swal) {
+                        Swal.fire({
+                            title: 'QR Tidak Terdeteksi',
+                            text: 'QR Code tidak terbaca dari gambar ini. Pastikan foto cukup jelas, tegak, dan tidak buram.',
+                            icon: 'warning',
+                            confirmButtonColor: '#059669',
+                            customClass: { popup: 'rounded-2xl' }
+                        });
+                    } else {
+                        alert("QR Code tidak terbaca dari gambar ini. Pastikan gambar cukup jelas.");
+                    }
                 });
         }
     </script>
 </body>
 </html>
-

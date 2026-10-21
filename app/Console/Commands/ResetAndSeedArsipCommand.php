@@ -5,26 +5,57 @@ namespace App\Console\Commands;
 use App\Models\ActivityLog;
 use App\Models\Arsip;
 use App\Models\Peminjaman;
+use App\Services\DatabaseBackupService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class ResetAndSeedArsipCommand extends Command
 {
-    protected $signature = 'arsip:reset-seed';
+    protected $signature = 'arsip:reset-seed {--force : Lewati konfirmasi dan jalankan langsung}';
+
     protected $description = 'Reset seluruh data arsip & peminjaman, lalu isi dengan 50 data arsip BPJS Ketenagakerjaan fiktif yang realistis.';
 
-    public function handle(): int
+    public function handle(DatabaseBackupService $backupService): int
     {
+        // 1. Proteksi keamanan: cegah eksekusi di lingkungan production tanpa flag --force
+        if (app()->isProduction() && ! $this->option('force')) {
+            $this->error('PERINGATAN KEAMANAN: Perintah ini dicegah berjalan di lingkungan PRODUCTION demi integritas data.');
+            $this->error('Gunakan opsi --force jika Anda memiliki otorisasi penuh untuk mereset basis data produksi.');
+
+            return 1;
+        }
+
+        // 2. Konfirmasi interaktif untuk mencegah salah jalan secara tidak sengaja
+        if (! $this->option('force')) {
+            if (! $this->confirm('PERINGATAN: Perintah ini akan MENGHAPUS SELURUH data arsip, peminjaman, dan log aktivitas. Apakah Anda yakin ingin melanjutkan?')) {
+                $this->info('Operasi reset dibatalkan. Data Anda tetap aman.');
+
+                return 0;
+            }
+        }
+
         $this->warn('Memulai proses reset data arsip, peminjaman, dan log...');
+
+        try {
+            $backupPath = $backupService->backup();
+        } catch (\Throwable $e) {
+            $this->error('Reset dibatalkan karena backup sebelum reset gagal: '.$e->getMessage());
+
+            return Command::FAILURE;
+        }
+
+        $this->info("Backup sebelum reset berhasil dibuat: {$backupPath}");
 
         // 1. Bersihkan tabel terkait tanpa menghapus user admin
         Schema::disableForeignKeyConstraints();
-        Peminjaman::truncate();
-        Arsip::withTrashed()->forceDelete();
-        ActivityLog::truncate();
-        Schema::enableForeignKeyConstraints();
+        try {
+            Peminjaman::truncate();
+            Arsip::withTrashed()->forceDelete();
+            ActivityLog::truncate();
+        } finally {
+            Schema::enableForeignKeyConstraints();
+        }
 
         $this->info('Tabel arsips, peminjamans, dan activity_logs berhasil dikosongkan.');
 
@@ -342,8 +373,8 @@ class ResetAndSeedArsipCommand extends Command
         $this->info('50 arsip realistis BPJS berhasil disimpan ke database.');
 
         // 3. Buat transaksi peminjaman (3 sedang dipinjam tepat waktu, 3 terlambat, 4 sudah dikembalikan)
-        $arsip4  = Arsip::where('kode_berkas', 'J0401B-00004')->first();
-        $arsip9  = Arsip::where('kode_berkas', 'J0401B-00009')->first();
+        $arsip4 = Arsip::where('kode_berkas', 'J0401B-00004')->first();
+        $arsip9 = Arsip::where('kode_berkas', 'J0401B-00009')->first();
         $arsip17 = Arsip::where('kode_berkas', 'J0401B-00017')->first();
         $arsip28 = Arsip::where('kode_berkas', 'J0401B-00028')->first();
         $arsip37 = Arsip::where('kode_berkas', 'J0401B-00037')->first();
@@ -447,4 +478,3 @@ class ResetAndSeedArsipCommand extends Command
         return Command::SUCCESS;
     }
 }
-

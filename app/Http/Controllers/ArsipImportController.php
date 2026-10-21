@@ -24,11 +24,18 @@ class ArsipImportController extends Controller
 
             ActivityLog::catat('IMPORT', "melakukan import arsip dari Excel ({$import->masuk} masuk, {$import->dilewati} dilewati).");
 
-            $pesan = "{$import->masuk} arsip berhasil di-import, {$import->dilewati} baris dilewati (kode/nama kosong atau kode sudah terdaftar).";
+            $pesan = "{$import->masuk} arsip berhasil di-import, {$import->dilewati} baris dilewati.";
+
+            if ($import->jumlahCatatan > 0) {
+                session()->flash('import_errors', [
+                    'total' => $import->jumlahCatatan,
+                    'items' => $import->catatan,
+                ]);
+            }
 
             return redirect()->route('arsip.index')->with($import->masuk > 0 ? 'success' : 'warning', $pesan);
         } catch (\Exception $e) {
-            return redirect()->route('arsip.index')->with('error', 'Terjadi kesalahan format: ' . $e->getMessage());
+            return redirect()->route('arsip.index')->with('error', 'Terjadi kesalahan format: '.$e->getMessage());
         }
     }
 

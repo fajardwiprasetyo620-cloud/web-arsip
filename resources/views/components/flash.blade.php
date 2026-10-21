@@ -50,3 +50,30 @@
         </ul>
     </div>
 @endif
+
+@if (session('import_errors.total', 0) > 0)
+    <div class="mb-6 rounded-xl border border-amber-300 bg-amber-50/80 p-4 text-sm text-amber-900 shadow-2xs" role="alert" x-data="{ open: true }">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2 font-bold">
+                <svg class="h-5 w-5 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <span>Catatan Hasil Impor Excel ({{ session('import_errors.total') }} Baris):</span>
+            </div>
+            <button type="button" @click="open = !open" class="text-xs font-semibold text-amber-800 underline hover:text-amber-950">
+                <span x-text="open ? 'Sembunyikan' : 'Lihat Rincian'"></span>
+            </button>
+        </div>
+        <div x-show="open" class="mt-3 max-h-60 overflow-y-auto rounded-lg border border-amber-200 bg-white p-3 text-xs divide-y divide-amber-100">
+            @foreach (session('import_errors.items', []) as $catatan)
+                <div class="py-1.5 flex items-start gap-1.5 font-medium text-slate-700">
+                    <span class="text-amber-600 font-bold shrink-0">•</span>
+                    <span>{{ $catatan }}</span>
+                </div>
+            @endforeach
+            @if (session('import_errors.total') > count(session('import_errors.items', [])))
+                <p class="pt-2 font-semibold text-amber-800">
+                    Rincian dibatasi hingga {{ count(session('import_errors.items', [])) }} catatan pertama.
+                </p>
+            @endif
+        </div>
+    </div>
+@endif

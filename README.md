@@ -48,7 +48,7 @@ Aplikasi ini dikembangkan untuk mempermudah pencarian berkas klaim (*JHT, JKK, J
 | **PDF & Excel** | [Barryvdh Laravel-DomPDF](https://github.com/barryvdh/laravel-dompdf) & [Maatwebsite Excel 3.1](https://maatwebsite.nl) |
 | **Visualisasi Grafik** | [Chart.js 4](https://www.chartjs.org/) |
 | **Database Engine** | MySQL / MariaDB (Didukung Indexing Teroptimasi) |
-| **Pengujian (Testing)** | PHPUnit / Pest dengan **85 Automated Feature Tests** (100% Pass) |
+| **Pengujian (Testing)** | PHPUnit dengan **93 Automated Tests** (100% Pass) |
 
 ---
 
@@ -122,7 +122,7 @@ Aplikasi dilengkapi suite pengujian otomatis yang komprehensif:
 ```bash
 php artisan test
 ```
-Hasil: **85 tests passed (234 assertions)** tanpa satupun eror.
+Hasil terakhir: **93 tests passed (264 assertions)** tanpa satupun eror.
 
 ---
 
