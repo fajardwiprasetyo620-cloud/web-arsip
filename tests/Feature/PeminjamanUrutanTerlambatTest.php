@@ -8,75 +8,42 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * Uji urutan halaman Peminjaman: transaksi yang memiliki arsip TERLAMBAT
- * (masih Dipinjam dan sudah lewat tenggat) harus tampil paling atas,
- * supaya tidak terlewat walau datanya sudah banyak.
+ * Uji pemisahan daftar peminjaman berdasarkan status setiap berkas.
  */
 class PeminjamanUrutanTerlambatTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function kunciTransaksi($response): array
-    {
-        return $response->viewData('groupedPeminjamans')->getCollection()->keys()->all();
-    }
-
-    public function test_transaksi_terlambat_tampil_paling_atas_walau_dibuat_lebih_lama(): void
+    public function test_berkas_terlambat_diurutkan_paling_lama_lewat_tenggat(): void
     {
         $admin = User::factory()->create();
 
-        // Dibuat LEBIH DULU dan sudah terlambat
-        Peminjaman::factory()->terlambat()->create([
+        $terlambatLama = Peminjaman::factory()->terlambat()->create([
             'nama_peminjam' => 'Budi',
+            'tenggat_waktu' => now()->subDays(9)->toDateString(),
             'created_at'    => now()->subDays(2),
         ]);
-        // Dibuat BELAKANGAN dan belum terlambat (tenggat masih 7 hari lagi)
-        Peminjaman::factory()->create([
+        $terlambatBaru = Peminjaman::factory()->terlambat()->create([
             'nama_peminjam' => 'Andi',
-            'created_at'    => now(),
+            'tenggat_waktu' => now()->subDays(2)->toDateString(),
         ]);
 
         $response = $this->actingAs($admin)->get(route('peminjaman.index'));
 
         $response->assertOk();
-        $kunci = $this->kunciTransaksi($response);
-
-        $this->assertCount(2, $kunci);
-        $this->assertStringStartsWith('Budi#', $kunci[0]); // terlambat -> paling atas
-        $this->assertStringStartsWith('Andi#', $kunci[1]);
-        $this->assertSame(1, $response->viewData('jumlahTransaksiTerlambat'));
-    }
-
-    public function test_yang_paling_lama_lewat_tenggat_ada_di_paling_atas(): void
-    {
-        $admin = User::factory()->create();
-
-        Peminjaman::factory()->terlambat()->create([
-            'nama_peminjam' => 'Dika',
-            'tenggat_waktu' => now()->subDays(2)->toDateString(),
-        ]);
-        Peminjaman::factory()->terlambat()->create([
-            'nama_peminjam' => 'Eka',
-            'tenggat_waktu' => now()->subDays(9)->toDateString(),
-        ]);
-
-        $response = $this->actingAs($admin)->get(route('peminjaman.index'));
-        $kunci = $this->kunciTransaksi($response);
-
-        $this->assertStringStartsWith('Eka#', $kunci[0]);  // lewat 9 hari
-        $this->assertStringStartsWith('Dika#', $kunci[1]); // lewat 2 hari
+        $idsTerlambat = $response->viewData('peminjamanTerlambat')->getCollection()->pluck('id')->all();
+        $this->assertSame([$terlambatLama->id, $terlambatBaru->id], $idsTerlambat);
     }
 
     public function test_arsip_yang_sudah_dikembalikan_tidak_dianggap_terlambat(): void
     {
         $admin = User::factory()->create();
 
-        Peminjaman::factory()->terlambat()->create([
+        $terlambat = Peminjaman::factory()->terlambat()->create([
             'nama_peminjam' => 'Budi',
             'created_at'    => now()->subDays(2),
         ]);
-        // Tenggatnya sudah lewat, tapi arsip SUDAH dikembalikan -> bukan terlambat
-        Peminjaman::factory()->dikembalikan()->create([
+        $dikembalikan = Peminjaman::factory()->dikembalikan()->create([
             'nama_peminjam'  => 'Cici',
             'tanggal_pinjam' => now()->subDays(10)->toDateString(),
             'tenggat_waktu'  => now()->subDays(3)->toDateString(),
@@ -84,11 +51,37 @@ class PeminjamanUrutanTerlambatTest extends TestCase
         ]);
 
         $response = $this->actingAs($admin)->get(route('peminjaman.index'));
-        $kunci = $this->kunciTransaksi($response);
 
-        $this->assertStringStartsWith('Budi#', $kunci[0]);
-        $this->assertStringStartsWith('Cici#', $kunci[1]);
-        $this->assertSame(1, $response->viewData('jumlahTransaksiTerlambat'));
-        $this->assertNotContains($kunci[1], $response->viewData('kunciTerlambat'));
+        $this->assertSame([$terlambat->id], $response->viewData('peminjamanTerlambat')->getCollection()->pluck('id')->all());
+        $this->assertSame([$dikembalikan->id], $response->viewData('peminjamanDikembalikan')->getCollection()->pluck('id')->all());
+        $this->assertTrue($response->viewData('peminjamanAktif')->isEmpty());
+    }
+
+    public function test_transaksi_campuran_menempatkan_setiap_berkas_di_tabel_statusnya_saja(): void
+    {
+        $admin = User::factory()->create();
+        $dataTransaksi = [
+            'nama_peminjam' => 'Dian Anggraini',
+            'tanggal_pinjam' => now()->subDays(10)->toDateString(),
+        ];
+
+        Peminjaman::factory()->terlambat()->create($dataTransaksi);
+        Peminjaman::factory()->create($dataTransaksi);
+        Peminjaman::factory()->dikembalikan()->create($dataTransaksi);
+
+        $response = $this->actingAs($admin)->get(route('peminjaman.index'));
+
+        $response->assertOk()
+            ->assertSee('Terlambat')
+            ->assertSee('Dipinjam')
+            ->assertSee('Dikembalikan');
+
+        $terlambatIds = $response->viewData('peminjamanTerlambat')->getCollection()->pluck('id')->all();
+        $aktifIds = $response->viewData('peminjamanAktif')->getCollection()->pluck('id')->all();
+        $dikembalikanIds = $response->viewData('peminjamanDikembalikan')->getCollection()->pluck('id')->all();
+        $this->assertCount(1, $terlambatIds);
+        $this->assertCount(1, $aktifIds);
+        $this->assertCount(1, $dikembalikanIds);
+        $this->assertCount(3, array_unique(array_merge($terlambatIds, $aktifIds, $dikembalikanIds)));
     }
 }

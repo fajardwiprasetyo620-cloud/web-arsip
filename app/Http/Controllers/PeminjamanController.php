@@ -38,49 +38,47 @@ class PeminjamanController extends Controller
         }
 
         $peminjamans = $query->get();
-
-        // Kelompokkan per transaksi (satu peminjam pada satu tanggal pinjam bisa
-        // meminjam beberapa arsip sekaligus), lalu paginate per TRANSAKSI -- bukan
-        // per baris arsip -- supaya satu transaksi tidak terpotong di tengah halaman.
-        $semuaTransaksi = $peminjamans->groupBy(function ($item) {
-            return $item->nama_peminjam . '#' . $item->tanggal_pinjam;
-        });
-
-        // Transaksi yang memiliki arsip TERLAMBAT (masih Dipinjam dan sudah lewat
-        // tenggat) dipindah ke paling atas, urut dari yang paling lama lewat tenggat.
-        // Sisanya tetap urut dari yang terbaru. Aturan "terlambat" sama persis dengan
-        // yang dipakai di view (status Dipinjam + hari ini melewati tenggat).
         $hariIni = now()->startOfDay();
-        $adaTerlambat = fn ($grup) => $grup->contains(
-            fn ($p) => $p->status === 'Dipinjam'
-                && !empty($p->tenggat_waktu)
-                && $hariIni->gt(Carbon::parse($p->tenggat_waktu)->startOfDay())
-        );
+        $isTerlambat = fn ($peminjaman) => $peminjaman->status === 'Dipinjam'
+            && !empty($peminjaman->tenggat_waktu)
+            && $hariIni->gt(Carbon::parse($peminjaman->tenggat_waktu)->startOfDay());
 
-        $transaksiTerlambat = $semuaTransaksi
-            ->filter($adaTerlambat)
-            ->sortBy(fn ($grup) => $grup->where('status', 'Dipinjam')->min('tenggat_waktu'));
-        $transaksiLainnya = $semuaTransaksi->reject($adaTerlambat);
+        $daftarTerlambat = $peminjamans
+            ->filter($isTerlambat)
+            ->sortBy(fn ($peminjaman) => Carbon::parse($peminjaman->tenggat_waktu)->startOfDay());
+        $daftarDipinjam = $peminjamans
+            ->filter(fn ($peminjaman) => $peminjaman->status === 'Dipinjam' && !$isTerlambat($peminjaman))
+            ->sortByDesc('created_at');
+        $daftarDikembalikan = $peminjamans
+            ->where('status', 'Dikembalikan')
+            ->sortByDesc('created_at');
 
-        $kunciTerlambat = $transaksiTerlambat->keys()->all();
-        $jumlahTransaksiTerlambat = count($kunciTerlambat);
-        // toBase(): merge() milik Eloquent Collection hanya untuk menggabungkan MODEL
-        // (dan membuang kunci teks). Di sini yang digabung adalah kelompok transaksi
-        // berkunci "nama#tanggal", jadi harus memakai koleksi biasa.
-        $semuaTransaksi = $transaksiTerlambat->toBase()->merge($transaksiLainnya->toBase());
+        $paginate = function ($items, string $pageName) use ($request) {
+            $perHalaman = 10;
+            $halaman = LengthAwarePaginator::resolveCurrentPage($pageName);
 
-        $perHalaman = 10;
-        $halaman = LengthAwarePaginator::resolveCurrentPage();
+            return new LengthAwarePaginator(
+                $items->forPage($halaman, $perHalaman)->values(),
+                $items->count(),
+                $perHalaman,
+                $halaman,
+                [
+                    'path' => LengthAwarePaginator::resolveCurrentPath(),
+                    'query' => $request->query(),
+                    'pageName' => $pageName,
+                ]
+            );
+        };
 
-        $groupedPeminjamans = new LengthAwarePaginator(
-            $semuaTransaksi->forPage($halaman, $perHalaman),
-            $semuaTransaksi->count(),
-            $perHalaman,
-            $halaman,
-            ['path' => LengthAwarePaginator::resolveCurrentPath(), 'query' => $request->query()]
-        );
+        $peminjamanTerlambat = $paginate($daftarTerlambat, 'terlambat_page');
+        $peminjamanAktif = $paginate($daftarDipinjam, 'dipinjam_page');
+        $peminjamanDikembalikan = $paginate($daftarDikembalikan, 'dikembalikan_page');
 
-        return view('peminjaman.index', compact('groupedPeminjamans', 'kunciTerlambat', 'jumlahTransaksiTerlambat'));
+        return view('peminjaman.index', compact(
+            'peminjamanTerlambat',
+            'peminjamanAktif',
+            'peminjamanDikembalikan'
+        ));
     }
 
     public function create()

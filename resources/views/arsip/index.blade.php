@@ -1,20 +1,20 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center w-full">
-            <h2 class="font-semibold text-xl text-white leading-tight flex items-center gap-2">
+        <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-4 w-full">
+            <h2 class="font-semibold text-xl sm:text-2xl text-white leading-tight flex items-center gap-2.5">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
                 {{ __('Daftar Arsip Fisik') }}
             </h2>
             
-            <div class="flex gap-2">
-                <a href="{{ route('arsip.logs') }}" class="bg-white hover:bg-emerald-50 text-emerald-700 text-sm font-bold py-2 px-4 rounded-lg shadow-sm flex items-center gap-2 transition duration-200 border border-emerald-100">
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="{{ route('arsip.logs') }}" class="bg-white hover:bg-emerald-50 text-emerald-700 text-sm sm:text-base font-bold py-2.5 px-4 sm:px-5 rounded-lg shadow-sm flex items-center gap-2.5 transition duration-200 border border-emerald-100">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    <span class="hidden sm:inline">Log Aktivitas</span>
+                    <span>Log Aktivitas</span>
                 </a>
 
-                <a href="{{ route('arsip.history') }}" class="bg-emerald-700 hover:bg-emerald-800 text-emerald-50 hover:text-white text-sm font-semibold py-2 px-4 rounded-lg shadow-sm flex items-center gap-2 transition duration-200 border border-emerald-500">
+                <a href="{{ route('arsip.history') }}" class="bg-emerald-700 hover:bg-emerald-800 text-emerald-50 hover:text-white text-sm sm:text-base font-semibold py-2.5 px-4 sm:px-5 rounded-lg shadow-sm flex items-center gap-2.5 transition duration-200 border border-emerald-500">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    <span class="hidden sm:inline">Riwayat Hapus</span>
+                    <span>Riwayat Hapus</span>
                 </a>
             </div>
         </div>

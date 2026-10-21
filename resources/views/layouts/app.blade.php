@@ -19,7 +19,7 @@
             <!-- Page Heading dengan aksen shadow yang lebih lembut -->
             @if (isset($header))
                 <header class="bg-emerald-600 shadow-md relative z-10">
-                    <div class="max-w-7xl mx-auto py-5 px-4 sm:px-6 lg:px-8">
+                    <div class="max-w-7xl min-h-[5.25rem] mx-auto py-3 px-4 sm:px-6 lg:px-8 flex items-center">
                         {{ $header }}
                     </div>
                 </header>
