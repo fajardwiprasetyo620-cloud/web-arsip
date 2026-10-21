@@ -20,13 +20,32 @@
                         <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
                     <div class="text-center sm:text-left flex-1">
-                        <h3 class="text-2xl font-extrabold text-gray-800 mb-2">Selamat datang kembali, {{ Auth::user()->name }}! 👋</h3>
+                        <h3 class="text-2xl font-extrabold text-gray-800 mb-2">Selamat datang kembali, {{ Auth::user()->name }}!</h3>
                         <p class="text-sm text-gray-600 font-medium leading-relaxed">
                             Berikut adalah rangkuman aktivitas dan status E-Arsip fisik hari ini. Pastikan untuk selalu memantau arsip yang statusnya sedang dipinjam agar tidak terlewat dari batas waktu pengembalian.
                         </p>
                     </div>
                 </div>
             </div>
+
+            @if($jumlahTerlambat > 0)
+                <!-- BANNER PERINGATAN KETERLAMBATAN REAL-TIME -->
+                <div class="mb-8 bg-gradient-to-r from-rose-500 to-red-600 rounded-2xl p-5 sm:p-6 text-white shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 bg-white/20 backdrop-blur-sm rounded-xl shrink-0">
+                            <svg class="w-8 h-8 text-white animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-extrabold text-lg text-white">Perhatian: Ada {{ $jumlahTerlambat }} Peminjaman Melewati Batas Waktu!</h4>
+                            <p class="text-rose-100 text-xs sm:text-sm font-medium mt-0.5">Segera kirimkan pesan pengingat WhatsApp kepada peminjam agar berkas fisik segera dikembalikan ke ruang arsip.</p>
+                        </div>
+                    </div>
+                    <a href="{{ route('peminjaman.index') }}" class="shrink-0 bg-white hover:bg-rose-50 text-rose-700 font-extrabold px-5 py-2.5 rounded-xl text-sm shadow transition duration-200 inline-flex items-center gap-2">
+                        <span>Tindak Lanjut & Kirim WA</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+                </div>
+            @endif
             
             <!-- 1. KARTU RINGKASAN ANGKA -->
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
@@ -211,6 +230,100 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            <!-- 4. MONITORING KAPASITAS & TATA LETAK RAK FISIK -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-7 mb-8" x-data="{ activeRuang: '{{ array_key_first($kapasitasRuang) }}' }">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-5 border-b border-gray-100">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                            <span>Monitoring Kapasitas & Tata Letak Rak Fisik</span>
+                        </h3>
+                        <p class="text-xs sm:text-sm text-gray-500 mt-1">Pemetaan daya tampung baris rak dan box arsip pada masing-masing ruangan penyimpanan.</p>
+                    </div>
+
+                    <!-- Room Tab Buttons -->
+                    <div class="inline-flex p-1 bg-slate-100 rounded-xl gap-1 shrink-0">
+                        @foreach($kapasitasRuang as $namaRuang => $rData)
+                            <button type="button" @click="activeRuang = '{{ $namaRuang }}'"
+                                    :class="activeRuang === '{{ $namaRuang }}' ? 'bg-white text-emerald-800 shadow-2xs font-bold' : 'text-gray-600 hover:text-gray-900 font-medium'"
+                                    class="px-4 py-2 text-xs sm:text-sm rounded-lg transition duration-150">
+                                {{ $namaRuang }}
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Tab Content per Ruangan -->
+                @foreach($kapasitasRuang as $namaRuang => $rData)
+                    <div x-show="activeRuang === '{{ $namaRuang }}'" x-cloak class="space-y-6">
+                        <!-- Ringkasan Ruangan -->
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 p-4 bg-emerald-50/40 rounded-xl border border-emerald-100/70">
+                            <div>
+                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Berkas</span>
+                                <div class="text-xl sm:text-2xl font-black text-emerald-700">{{ $rData['total_arsip'] }} Berkas</div>
+                            </div>
+                            <div>
+                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Box Fisik</span>
+                                <div class="text-xl sm:text-2xl font-black text-emerald-700">{{ $rData['total_box'] }} Box</div>
+                            </div>
+                            <div class="col-span-2 sm:col-span-1">
+                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Kapasitas Maksimal</span>
+                                <div class="text-xl sm:text-2xl font-black text-emerald-700">{{ $rData['max_baris'] }} Baris / Rak</div>
+                            </div>
+                        </div>
+
+                        <!-- Grid 4 Rak -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+                            @foreach($rData['raks'] as $namaRak => $rakInfo)
+                                @php
+                                    $badgeColor = $rakInfo['persen'] >= 85 ? 'bg-red-100 text-red-700 border-red-200' : ($rakInfo['persen'] >= 50 ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200');
+                                    $barColor = $rakInfo['persen'] >= 85 ? 'bg-red-500' : ($rakInfo['persen'] >= 50 ? 'bg-amber-500' : 'bg-emerald-500');
+                                @endphp
+                                <div class="bg-white rounded-xl border border-gray-200/90 shadow-2xs p-4 flex flex-col justify-between hover:shadow-sm transition">
+                                    <div>
+                                        <div class="flex items-center justify-between mb-3">
+                                            <span class="font-extrabold text-base text-gray-800">{{ $namaRak }}</span>
+                                            <span class="px-2 py-0.5 text-[11px] font-bold rounded border {{ $badgeColor }}">
+                                                {{ $rakInfo['baris_terisi'] }}/{{ $rakInfo['max_baris'] }} Baris
+                                            </span>
+                                        </div>
+
+                                        <!-- Progress Bar -->
+                                        <div class="w-full bg-gray-100 rounded-full h-2 mb-3 overflow-hidden">
+                                            <div class="{{ $barColor }} h-2 rounded-full transition-all duration-500" style="width: {{ $rakInfo['persen'] }}%"></div>
+                                        </div>
+
+                                        <!-- Level Baris Shelf Visualizer -->
+                                        <div class="space-y-1.5 my-3">
+                                            @foreach($rakInfo['detail_baris'] as $nomorBaris => $barisDetail)
+                                                <div class="p-2 rounded text-xs border {{ $barisDetail['total_arsip'] > 0 ? 'bg-slate-50 border-gray-200 text-gray-800' : 'bg-gray-50/50 border-dashed border-gray-200 text-gray-400' }}">
+                                                    <div class="flex items-center justify-between font-semibold">
+                                                        <span>Baris {{ $nomorBaris }}</span>
+                                                        @if($barisDetail['total_arsip'] > 0)
+                                                            <span class="text-[11px] text-emerald-700 font-bold">{{ $barisDetail['total_box'] }} Box &middot; {{ $barisDetail['total_arsip'] }} Berkas</span>
+                                                        @else
+                                                            <span class="text-[10px] text-gray-400 italic">Kosong</span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-3 border-t border-gray-100 flex items-center justify-between">
+                                        <span class="text-xs text-gray-500 font-medium">{{ $rakInfo['total_box'] }} Box terdaftar</span>
+                                        <a href="{{ route('arsip.index', ['ruangan' => $namaRuang, 'search' => $namaRak]) }}" class="text-xs font-bold text-emerald-600 hover:text-emerald-700 inline-flex items-center gap-1 transition">
+                                            <span>Lihat Berkas</span>
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endforeach
             </div>
 
         </div>

@@ -3,6 +3,8 @@
 namespace App\Imports;
 
 use App\Models\Arsip;
+use Illuminate\Support\Carbon;
+use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
@@ -52,6 +54,7 @@ class ArsipImport implements ToModel, WithHeadingRow, WithBatchInserts, WithChun
         $rak     = trim((string) ($row['rak'] ?? ''));
         $box     = trim((string) ($row['box'] ?? ''));
         $baris   = $row['baris'] ?? null;
+        $tanggal = $this->parseTanggal($row['tanggal_berkas'] ?? $row['tanggal'] ?? null);
 
         $this->masuk++;
 
@@ -62,8 +65,45 @@ class ArsipImport implements ToModel, WithHeadingRow, WithBatchInserts, WithChun
             'rak'         => $rak !== '' ? $rak : 'Belum Diatur',
             'baris'       => (is_numeric($baris) && (int) $baris >= 1) ? (int) $baris : 1,
             'box'         => $box !== '' ? $box : '0',
+            'tanggal_berkas' => $tanggal,
             'status'      => 'Tersedia',
         ]);
+    }
+
+    /**
+     * Membaca tanggal dari sel Excel. Mendukung: angka seri Excel, "2026-10-01",
+     * dan "01/10/2026" (hari/bulan/tahun). Nilai kosong atau tidak valid -> null
+     * (baris tetap diimpor, hanya tanggalnya yang dikosongkan).
+     */
+    private function parseTanggal($nilai): ?string
+    {
+        if ($nilai === null || trim((string) $nilai) === '') {
+            return null;
+        }
+
+        try {
+            // Excel menyimpan sel tanggal sebagai angka seri (hari sejak 1900)
+            if (is_numeric($nilai)) {
+                $seri = (float) $nilai;
+
+                return ($seri >= 20000 && $seri <= 80000)
+                    ? ExcelDate::excelToDateTimeObject($seri)->format('Y-m-d')
+                    : null;
+            }
+
+            $teks = trim((string) $nilai);
+
+            if (preg_match('#^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$#', $teks, $m)) {
+                // Hari/bulan/tahun; tolak tanggal yang tidak ada (mis. 31/02)
+                return checkdate((int) $m[2], (int) $m[1], (int) $m[3])
+                    ? sprintf('%04d-%02d-%02d', $m[3], $m[2], $m[1])
+                    : null;
+            }
+
+            return Carbon::parse($teks)->format('Y-m-d');
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 
     /** Judul kolom ada di baris ke-4 Excel */

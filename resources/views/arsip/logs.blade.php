@@ -29,6 +29,11 @@
                         <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 text-sm rounded-lg shadow-sm transition duration-200 whitespace-nowrap">
                             Cari Log
                         </button>
+
+                        <a href="{{ route('arsip.logs.excel', request()->query()) }}" class="bg-white hover:bg-emerald-50 text-gray-700 hover:text-emerald-700 border border-gray-300 hover:border-emerald-300 font-semibold py-2 px-4 text-sm rounded-lg shadow-sm transition duration-200 flex items-center gap-1.5 whitespace-nowrap" title="Export riwayat log audit ke file Excel">
+                            <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <span>Export Excel</span>
+                        </a>
                         
                         @if(request()->filled('search'))
                             <a href="{{ route('arsip.logs') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-3 text-sm rounded-lg shadow-sm transition duration-200 flex items-center justify-center">

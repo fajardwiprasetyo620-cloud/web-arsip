@@ -59,13 +59,20 @@
                                 <label class="block text-gray-700 text-sm font-bold mb-2">Nomor Box</label>
                                 <input type="text" name="box" class="border-gray-300 rounded-lg w-full py-2.5 px-4 text-gray-700 focus:ring-emerald-500 focus:border-emerald-500 shadow-sm transition" required placeholder="Contoh: 12">
                             </div>
+
+                            <!-- Input Tanggal Berkas -->
+                            <div>
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal Berkas (Opsional)</label>
+                                <input type="date" name="tanggal_berkas" value="{{ old('tanggal_berkas') }}" max="{{ now()->toDateString() }}" class="border-gray-300 rounded-lg w-full py-2.5 px-4 text-gray-700 focus:ring-emerald-500 focus:border-emerald-500 shadow-sm transition">
+                                <p class="text-xs text-gray-500 mt-1">Tanggal dokumen dibuat. Dipakai untuk urutan di dalam box dan rentang tanggal di stiker.</p>
+                            </div>
                         </div>
 
                         <!-- Area Unggah Softcopy (Arsip Digital) -->
                         <div class="mb-8 bg-slate-50 p-5 rounded-lg border border-slate-200">
                             <label class="block text-slate-700 text-sm font-bold mb-2">Upload Softcopy / Arsip Digital (Opsional)</label>
                             <input type="file" name="file_dokumen" accept=".pdf,.jpg,.jpeg,.png" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 border border-slate-300 rounded-lg p-1.5 focus:ring-emerald-500 focus:border-emerald-500 transition bg-white cursor-pointer">
-                            <p class="text-xs text-slate-500 mt-2">Format yang didukung: PDF, JPG, PNG. Ukuran maksimal: 2MB.</p>
+                            <p class="text-xs text-slate-500 mt-2">Format yang didukung: PDF, JPG, PNG. Ukuran maksimal: 10MB.</p>
                         </div>
 
                         <div class="flex items-center justify-end gap-4 pt-4 border-t border-gray-100">

@@ -16,9 +16,10 @@
         "vite": "^5.0.0"
     },
     "dependencies": {
-        "chart.js": "^4.4.0",
-        "sweetalert2": "^11.10.0",
         "@fontsource-variable/plus-jakarta-sans": "^5.0.20",
+        "chart.js": "^4.4.0",
+        "html5-qrcode": "^2.3.8",
+        "sweetalert2": "^11.10.0",
         "tom-select": "^2.3.1"
     }
 }

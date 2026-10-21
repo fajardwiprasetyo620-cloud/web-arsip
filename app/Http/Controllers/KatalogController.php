@@ -28,4 +28,9 @@ class KatalogController extends Controller
 
         return view('katalog-detail', compact('arsip'));
     }
+
+    public function scan()
+    {
+        return view('scan-qr');
+    }
 }

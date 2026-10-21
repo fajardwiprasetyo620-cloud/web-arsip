@@ -18,8 +18,16 @@
                     <x-nav-link :href="route('arsip.index')" :active="request()->routeIs('arsip.*')">
                         {{ __('Daftar Arsip') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('peminjaman.index')" :active="request()->routeIs('peminjaman.*')">
-                        {{ __('Peminjaman') }}
+                    <x-nav-link :href="route('peminjaman.index')" :active="request()->routeIs('peminjaman.*')" class="inline-flex items-center gap-1.5">
+                        <span>{{ __('Peminjaman') }}</span>
+                        @if(($jumlahPeminjamanTerlambat ?? 0) > 0)
+                            <span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-black leading-none text-white bg-rose-600 rounded-full shadow-xs animate-pulse" title="{{ $jumlahPeminjamanTerlambat }} peminjaman terlambat">
+                                {{ $jumlahPeminjamanTerlambat }}
+                            </span>
+                        @endif
+                    </x-nav-link>
+                    <x-nav-link :href="route('qr.scan')" :active="request()->routeIs('qr.scan')">
+                        {{ __('Scan QR') }}
                     </x-nav-link>
                 </div>
             </div>
@@ -42,6 +50,10 @@
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
+                        </x-dropdown-link>
+
+                        <x-dropdown-link :href="route('database.backup')">
+                            {{ __('Backup Database (.sql)') }}
                         </x-dropdown-link>
 
                         <!-- Authentication -->
@@ -79,8 +91,16 @@
             <x-responsive-nav-link :href="route('arsip.index')" :active="request()->routeIs('arsip.*')">
                 {{ __('Daftar Arsip') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('peminjaman.index')" :active="request()->routeIs('peminjaman.*')">
-                {{ __('Peminjaman') }}
+            <x-responsive-nav-link :href="route('peminjaman.index')" :active="request()->routeIs('peminjaman.*')" class="flex justify-between items-center">
+                <span>{{ __('Peminjaman') }}</span>
+                @if(($jumlahPeminjamanTerlambat ?? 0) > 0)
+                    <span class="px-2 py-0.5 text-xs font-bold text-white bg-rose-600 rounded-full shadow-2xs">
+                        {{ $jumlahPeminjamanTerlambat }} Terlambat
+                    </span>
+                @endif
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('qr.scan')" :active="request()->routeIs('qr.scan')">
+                {{ __('Scan QR') }}
             </x-responsive-nav-link>
         </div>
 
@@ -94,6 +114,10 @@
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('database.backup')">
+                    {{ __('Backup Database (.sql)') }}
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->

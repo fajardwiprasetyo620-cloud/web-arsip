@@ -23,11 +23,18 @@
                 </div>
             </div>
             
-            <!-- Tombol Pintu Masuk Admin -->
-            <a href="{{ route('login') }}" class="bg-emerald-800 hover:bg-emerald-900 border border-emerald-500 text-white font-semibold py-2 px-5 rounded-full transition duration-300 flex items-center gap-2 shadow-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
-                Login Admin
-            </a>
+            <div class="flex items-center gap-2.5">
+                <a href="{{ route('qr.scan') }}" class="bg-white/10 hover:bg-white/20 text-white border border-emerald-400 font-semibold py-2 px-4 rounded-full transition duration-300 flex items-center gap-2 shadow-sm text-sm" title="Scan QR Code Stiker Box / Berkas">
+                    <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                    <span>Scan QR</span>
+                </a>
+
+                <!-- Tombol Pintu Masuk Admin -->
+                <a href="{{ route('login') }}" class="bg-emerald-800 hover:bg-emerald-900 border border-emerald-500 text-white font-semibold py-2 px-5 rounded-full transition duration-300 flex items-center gap-2 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+                    Login Admin
+                </a>
+            </div>
         </div>
     </header>
 
@@ -49,14 +56,14 @@
                 <form action="{{ route('katalog.index') }}" method="GET" class="flex flex-wrap lg:flex-nowrap gap-2 w-full justify-end">
                     
                     <select name="ruangan" class="border-gray-300 text-gray-700 text-sm rounded-lg shadow-sm py-2 pl-3 pr-8 focus:ring-emerald-500 focus:border-emerald-500 bg-gray-50 font-medium">
-                        <option value="">🏢 Semua Ruangan</option>
+                        <option value="">Semua Ruangan</option>
                         @foreach($ruangans as $ruang)
                             <option value="{{ $ruang }}" {{ request('ruangan') == $ruang ? 'selected' : '' }}>{{ $ruang }}</option>
                         @endforeach
                     </select>
 
                     <select name="status" class="border-gray-300 text-gray-700 text-sm rounded-lg shadow-sm py-2 pl-3 pr-8 focus:ring-emerald-500 focus:border-emerald-500 bg-gray-50 font-medium">
-                        <option value="">📌 Semua Status</option>
+                        <option value="">Semua Status</option>
                         <option value="Tersedia" {{ request('status') == 'Tersedia' ? 'selected' : '' }}>Tersedia</option>
                         <option value="Dipinjam" {{ request('status') == 'Dipinjam' ? 'selected' : '' }}>Dipinjam</option>
                     </select>
@@ -99,34 +106,41 @@
                                 <td class="py-4 px-6 text-sm text-gray-800 leading-snug">{{ $arsip->nama_berkas }}</td>
                                 
                                 <td class="py-3 px-4">
-                                    <!-- Kontainer utama w-max agar menyesuaikan isi terlebar -->
-                                    <div class="inline-flex flex-col gap-1.5 w-max">
-                                        
-                                        <!-- Baris Atas: Ruangan (w-full dan justify-center agar meregang rata) -->
-                                        <span class="w-full justify-center inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 px-2.5 py-1 rounded border border-slate-200 text-[11px] font-bold uppercase shadow-sm whitespace-nowrap">
-                                            🏢 {{ $arsip->ruangan }}
-                                        </span>
-                                        
-                                        <!-- Baris Bawah: Rak, Baris, Box (w-full agar meregang mengikuti lebar baris atas) -->
-                                        <div class="flex items-center justify-between gap-1.5 w-full">
-                                            <span class="flex-1 justify-center whitespace-nowrap inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded border border-blue-200 text-xs font-semibold shadow-sm">
-                                                📚 {{ $arsip->rak }}
+                                    <div class="flex flex-col gap-1.5 min-w-[210px]">
+                                        <div class="flex items-center gap-1.5 text-xs font-bold text-purple-900">
+                                            <svg class="w-3.5 h-3.5 text-purple-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                            </svg>
+                                            <span class="truncate uppercase tracking-wider">{{ $arsip->ruangan }}</span>
+                                        </div>
+                                        <div class="inline-flex items-center flex-wrap gap-1 text-xs">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-md font-bold bg-blue-100 text-blue-900 border border-blue-400 shadow-2xs">
+                                                {{ preg_match('/^rak\b/i', trim($arsip->rak)) ? trim($arsip->rak) : 'Rak ' . trim($arsip->rak) }}
                                             </span>
-                                            <span class="flex-1 justify-center whitespace-nowrap inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2 py-1 rounded border border-emerald-200 text-xs font-semibold shadow-sm">
-                                                📍 Baris {{ $arsip->baris }}
+                                            <span class="text-slate-300 font-light">/</span>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-md font-bold bg-emerald-100 text-emerald-900 border border-emerald-400 shadow-2xs">
+                                                {{ preg_match('/^baris\b/i', trim($arsip->baris)) ? trim($arsip->baris) : 'Baris ' . trim($arsip->baris) }}
                                             </span>
-                                            <span class="flex-1 justify-center whitespace-nowrap inline-flex items-center gap-1 bg-amber-50 text-amber-700 px-2 py-1 rounded border border-amber-200 text-xs font-semibold shadow-sm">
-                                                📦 Box {{ $arsip->box }}
+                                            <span class="text-slate-300 font-light">/</span>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-md font-bold bg-amber-100 text-amber-900 border border-amber-400 shadow-2xs">
+                                                {{ preg_match('/^box\b/i', trim($arsip->box)) ? trim($arsip->box) : 'Box ' . trim($arsip->box) }}
                                             </span>
                                         </div>
-                                        
                                     </div>
                                 </td>
                                 
                                 <td class="py-4 px-6 text-center whitespace-nowrap">
-                                    <span class="px-3 py-1 text-xs font-bold rounded-full shadow-sm {{ $arsip->status == 'Tersedia' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-red-100 text-red-800 border border-red-200' }}">
-                                        {{ $arsip->status }}
-                                    </span>
+                                    @if ($arsip->status === 'Tersedia')
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                            Tersedia
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                                            Dipinjam
+                                        </span>
+                                    @endif
                                 </td>
                             </tr>
                             @empty
@@ -159,18 +173,19 @@
                                 {{ $arsip->status }}
                             </span>
                         </div>
-                        <div class="flex flex-wrap items-center gap-1.5">
-                            <span class="inline-flex items-center gap-1 bg-slate-100 text-slate-700 px-2.5 py-1 rounded border border-slate-200 text-[11px] font-bold uppercase shadow-sm">
-                                🏢 {{ $arsip->ruangan }}
+                        <div class="flex flex-wrap items-center gap-1.5 text-xs">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-bold text-purple-900 bg-purple-100 border border-purple-300">
+                                <svg class="w-3.5 h-3.5 text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                {{ $arsip->ruangan }}
                             </span>
-                            <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded border border-blue-200 text-xs font-semibold shadow-sm">
-                                📚 {{ $arsip->rak }}
+                            <span class="px-2 py-0.5 rounded-md font-bold bg-blue-100 text-blue-900 border border-blue-400">
+                                {{ preg_match('/^rak\b/i', trim($arsip->rak)) ? trim($arsip->rak) : 'Rak ' . trim($arsip->rak) }}
                             </span>
-                            <span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2 py-1 rounded border border-emerald-200 text-xs font-semibold shadow-sm">
-                                📍 Baris {{ $arsip->baris }}
+                            <span class="px-2 py-0.5 rounded-md font-bold bg-emerald-100 text-emerald-900 border border-emerald-400">
+                                {{ preg_match('/^baris\b/i', trim($arsip->baris)) ? trim($arsip->baris) : 'Baris ' . trim($arsip->baris) }}
                             </span>
-                            <span class="inline-flex items-center gap-1 bg-amber-50 text-amber-700 px-2 py-1 rounded border border-amber-200 text-xs font-semibold shadow-sm">
-                                📦 Box {{ $arsip->box }}
+                            <span class="px-2 py-0.5 rounded-md font-bold bg-amber-100 text-amber-900 border border-amber-400">
+                                {{ preg_match('/^box\b/i', trim($arsip->box)) ? trim($arsip->box) : 'Box ' . trim($arsip->box) }}
                             </span>
                         </div>
                     </div>

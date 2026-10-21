@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ActivityLogExport;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class LogAktivitasController extends Controller
 {
@@ -24,5 +27,13 @@ class LogAktivitasController extends Controller
         $logs = $query->orderBy('created_at', 'desc')->paginate(50)->withQueryString();
 
         return view('arsip.logs', compact('logs'));
+    }
+
+    public function excel(Request $request): BinaryFileResponse
+    {
+        $search = $request->query('search');
+        $namaFile = 'log-aktivitas-arsip-' . now()->format('Y-m-d_His') . '.xlsx';
+
+        return Excel::download(new ActivityLogExport($search), $namaFile);
     }
 }

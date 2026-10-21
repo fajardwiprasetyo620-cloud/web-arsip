@@ -2,7 +2,7 @@
      sendiri), pakai SweetAlert2 yang sudah dimuat lewat resources/js/app.js.
      Error validasi (per kolom form) tetap ditampilkan sebagai kotak statis,
      supaya tidak hilang sebelum pengguna sempat memperbaiki form. Pakai: <x-flash /> --}}
-@if (session('success') || session('warning') || session('error'))
+@if (session('success') || session('warning') || session('error') || session('info'))
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const Toast = Swal.mixin({
@@ -17,15 +17,25 @@
                 },
             });
 
+            const messages = [];
             @if (session('success'))
-                Toast.fire({ icon: 'success', title: @json(session('success')) });
+                messages.push({ icon: 'success', title: @json(session('success')) });
             @endif
             @if (session('warning'))
-                Toast.fire({ icon: 'warning', title: @json(session('warning')) });
+                messages.push({ icon: 'warning', title: @json(session('warning')) });
+            @endif
+            @if (session('info'))
+                messages.push({ icon: 'info', title: @json(session('info')) });
             @endif
             @if (session('error'))
-                Toast.fire({ icon: 'error', title: @json(session('error')) });
+                messages.push({ icon: 'error', title: @json(session('error')) });
             @endif
+
+            messages.forEach((msg, idx) => {
+                setTimeout(() => {
+                    Toast.fire(msg);
+                }, idx * 3700);
+            });
         });
     </script>
 @endif

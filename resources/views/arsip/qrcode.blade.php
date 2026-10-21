@@ -49,7 +49,7 @@
             </div>
         </div>
         
-        <button class="print-btn" onclick="window.print()">🖨️ Cetak Stiker Label</button>
+        <button class="print-btn" onclick="window.print()">Cetak Stiker Label</button>
     </div>
 </body>
 </html>

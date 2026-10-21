@@ -55,20 +55,33 @@
                                 <label class="block text-gray-700 text-sm font-bold mb-2">Nomor Box</label>
                                 <input type="text" name="box" value="{{ $arsip->box }}" class="border-gray-300 rounded-lg w-full py-2.5 px-4 text-gray-700 focus:ring-amber-500 focus:border-amber-500 shadow-sm transition" required>
                             </div>
+
+                            <!-- Input Tanggal Berkas -->
+                            <div>
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal Berkas (Opsional)</label>
+                                <input type="date" name="tanggal_berkas" value="{{ old('tanggal_berkas', $arsip->tanggal_berkas) }}" max="{{ now()->toDateString() }}" class="border-gray-300 rounded-lg w-full py-2.5 px-4 text-gray-700 focus:ring-amber-500 focus:border-amber-500 shadow-sm transition">
+                                <p class="text-xs text-gray-500 mt-1">Tanggal dokumen dibuat. Dipakai untuk urutan di dalam box dan rentang tanggal di stiker.</p>
+                            </div>
                         </div>
 
                         <!-- Softcopy / Arsip Digital -->
                         <div class="mb-8 bg-slate-50 p-5 rounded-lg border border-slate-200">
                             <label class="block text-slate-700 text-sm font-bold mb-2">Softcopy / Arsip Digital (Opsional)</label>
                             @if($arsip->file_dokumen)
-                                <p class="text-sm text-slate-600 mb-3">
-                                    File saat ini:
-                                    <a href="{{ route('arsip.file', $arsip->id) }}" target="_blank" class="text-blue-600 hover:underline font-semibold">Lihat file</a>
-                                    <span class="text-slate-400">&middot; unggah file baru di bawah untuk menggantinya</span>
-                                </p>
+                                <div class="mb-3 space-y-2">
+                                    <p class="text-sm text-slate-600">
+                                        File saat ini:
+                                        <a href="{{ route('arsip.file', $arsip->id) }}" target="_blank" class="text-blue-600 hover:underline font-semibold">Lihat file</a>
+                                        <span class="text-slate-400">&middot; unggah file baru di bawah untuk menggantinya</span>
+                                    </p>
+                                    <label class="inline-flex items-center gap-2 text-sm text-rose-600 cursor-pointer">
+                                        <input type="checkbox" name="hapus_file" value="1" class="rounded border-gray-300 text-rose-600 focus:ring-rose-500">
+                                        <span>Hapus file dokumen digital ini</span>
+                                    </label>
+                                </div>
                             @endif
                             <input type="file" name="file_dokumen" accept=".pdf,.jpg,.jpeg,.png" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100">
-                            <p class="text-xs text-slate-500 mt-2">Format yang didukung: PDF, JPG, PNG. Ukuran maksimal: 2MB.</p>
+                            <p class="text-xs text-slate-500 mt-2">Format yang didukung: PDF, JPG, PNG. Ukuran maksimal: 10MB.</p>
                         </div>
 
                         <div class="flex items-center justify-end gap-4 pt-4 border-t border-gray-100">

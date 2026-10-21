@@ -27,6 +27,7 @@ class Arsip extends Model
         'rak',
         'baris',
         'box',
+        'tanggal_berkas',
         'status',
         'file_dokumen',
     ];
@@ -55,6 +56,13 @@ class Arsip extends Model
                 });
             })
             ->when($filter['ruangan'] ?? null, fn ($q, $ruangan) => $q->where('ruangan', $ruangan))
-            ->when($filter['status'] ?? null, fn ($q, $status) => $q->where('status', $status));
+            ->when($filter['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
+            ->when($filter['digital'] ?? null, function ($q, $digital) {
+                if ($digital === 'sudah') {
+                    $q->whereNotNull('file_dokumen');
+                } elseif ($digital === 'belum') {
+                    $q->whereNull('file_dokumen');
+                }
+            });
     }
 }

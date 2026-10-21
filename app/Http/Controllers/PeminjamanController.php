@@ -8,6 +8,7 @@ use App\Models\Peminjaman;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -45,6 +46,29 @@ class PeminjamanController extends Controller
             return $item->nama_peminjam . '#' . $item->tanggal_pinjam;
         });
 
+        // Transaksi yang memiliki arsip TERLAMBAT (masih Dipinjam dan sudah lewat
+        // tenggat) dipindah ke paling atas, urut dari yang paling lama lewat tenggat.
+        // Sisanya tetap urut dari yang terbaru. Aturan "terlambat" sama persis dengan
+        // yang dipakai di view (status Dipinjam + hari ini melewati tenggat).
+        $hariIni = now()->startOfDay();
+        $adaTerlambat = fn ($grup) => $grup->contains(
+            fn ($p) => $p->status === 'Dipinjam'
+                && !empty($p->tenggat_waktu)
+                && $hariIni->gt(Carbon::parse($p->tenggat_waktu)->startOfDay())
+        );
+
+        $transaksiTerlambat = $semuaTransaksi
+            ->filter($adaTerlambat)
+            ->sortBy(fn ($grup) => $grup->where('status', 'Dipinjam')->min('tenggat_waktu'));
+        $transaksiLainnya = $semuaTransaksi->reject($adaTerlambat);
+
+        $kunciTerlambat = $transaksiTerlambat->keys()->all();
+        $jumlahTransaksiTerlambat = count($kunciTerlambat);
+        // toBase(): merge() milik Eloquent Collection hanya untuk menggabungkan MODEL
+        // (dan membuang kunci teks). Di sini yang digabung adalah kelompok transaksi
+        // berkunci "nama#tanggal", jadi harus memakai koleksi biasa.
+        $semuaTransaksi = $transaksiTerlambat->toBase()->merge($transaksiLainnya->toBase());
+
         $perHalaman = 10;
         $halaman = LengthAwarePaginator::resolveCurrentPage();
 
@@ -56,7 +80,7 @@ class PeminjamanController extends Controller
             ['path' => LengthAwarePaginator::resolveCurrentPath(), 'query' => $request->query()]
         );
 
-        return view('peminjaman.index', compact('groupedPeminjamans'));
+        return view('peminjaman.index', compact('groupedPeminjamans', 'kunciTerlambat', 'jumlahTransaksiTerlambat'));
     }
 
     public function create()
@@ -197,5 +221,39 @@ class PeminjamanController extends Controller
         $pdf->setPaper('A4', 'landscape');
 
         return $pdf->download('Laporan_Peminjaman_Terpilih.pdf');
+    }
+
+    /**
+     * Cetak Lembar Berita Acara Peminjaman (BAP) resmi per transaksi dengan kolom tanda tangan.
+     */
+    public function beritaAcara(Request $request)
+    {
+        $nama = $request->query('nama');
+        $tanggal = $request->query('tanggal');
+        $id = $request->query('id');
+
+        $query = Peminjaman::with('arsip');
+        if ($id) {
+            $peminjamans = $query->where('id', $id)->get();
+        } elseif ($nama && $tanggal) {
+            $peminjamans = $query->where('nama_peminjam', $nama)
+                                 ->whereDate('tanggal_pinjam', $tanggal)
+                                 ->get();
+        } else {
+            abort(404, 'Parameter Berita Acara tidak lengkap.');
+        }
+
+        if ($peminjamans->isEmpty()) {
+            abort(404, 'Data peminjaman tidak ditemukan.');
+        }
+
+        $first = $peminjamans->first();
+        $nomorBap = 'BAP/ARSIP/' . \Carbon\Carbon::parse($first->tanggal_pinjam)->format('Ymd') . '/' . str_pad($first->id, 4, '0', STR_PAD_LEFT);
+
+        $pdf = Pdf::loadView('peminjaman.bap', compact('peminjamans', 'first', 'nomorBap'));
+        $pdf->setPaper('A4', 'portrait');
+
+        $slugName = \Illuminate\Support\Str::slug($first->nama_peminjam . '-' . $first->tanggal_pinjam);
+        return $pdf->stream("Berita_Acara_Peminjaman_{$slugName}.pdf");
     }
 }

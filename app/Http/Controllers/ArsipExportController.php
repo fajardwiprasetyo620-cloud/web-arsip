@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ArsipDataExport;
 use App\Models\Arsip;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 /**
- * Ekspor data arsip ke PDF: seluruh data, atau hanya baris yang dipilih.
+ * Ekspor data arsip ke PDF & Excel: seluruh data, atau sesuai filter pencarian.
  */
 class ArsipExportController extends Controller
 {
@@ -34,5 +36,13 @@ class ArsipExportController extends Controller
         $pdf = Pdf::loadView('arsip.pdf', compact('arsips'));
 
         return $pdf->download('Laporan_Arsip_Terpilih.pdf');
+    }
+
+    public function excel(Request $request)
+    {
+        $filter = $request->only('search', 'ruangan', 'status', 'digital');
+        $namaFile = 'Data_Arsip_' . now()->format('Ymd_His') . '.xlsx';
+
+        return Excel::download(new ArsipDataExport($filter), $namaFile);
     }
 }

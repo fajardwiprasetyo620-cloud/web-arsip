@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Peminjaman;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +21,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Bagikan jumlah peminjaman terlambat ke navigasi
+        View::composer('layouts.navigation', function ($view) {
+            $jumlahTerlambat = rescue(fn () => Peminjaman::terlambat()->count(), 0);
+            $view->with('jumlahPeminjamanTerlambat', $jumlahTerlambat);
+        });
     }
 }

@@ -61,4 +61,16 @@ class ArsipDeletionTest extends TestCase
         }
         $this->assertDatabaseHas('arsips', ['id' => $dipinjam->id, 'deleted_at' => null]);
     }
+
+    public function test_arsip_bisa_dihapus_permanen(): void
+    {
+        $arsip = Arsip::factory()->create();
+        $arsip->delete();
+
+        $response = $this->actingAs($this->admin)->delete(route('arsip.forceDelete', $arsip->id));
+
+        $response->assertRedirect(route('arsip.history'));
+        $response->assertSessionHas('success');
+        $this->assertDatabaseMissing('arsips', ['id' => $arsip->id]);
+    }
 }
