@@ -36,7 +36,7 @@
                 {{ $slot }}
             </main>
 
-            <!-- FOOTER BARU -->
+            <!-- FOOTER -->
             <footer class="bg-white border-t border-gray-200 mt-12 py-6">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
                     <div class="mb-2 md:mb-0 font-medium">
@@ -48,12 +48,10 @@
                     </div>
                 </div>
             </footer>
-                    </div>
-                </div>
-            </footer>
 
         </div>
 
         <x-command-palette />
+        @stack('scripts')
     </body>
 </html>
