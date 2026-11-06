@@ -321,12 +321,15 @@
                                                     @if($barisDetail['total_arsip'] > 0 && !empty($barisDetail['boxes']))
                                                         <div class="flex flex-wrap gap-1 mt-2 pt-2 border-t border-slate-200/70">
                                                             @foreach($barisDetail['boxes'] as $boxName)
-                                                                <a href="{{ route('katalog.box', ['ruangan' => $namaRuang, 'rak' => $namaRak, 'box' => $boxName]) }}" 
+                                                                @php
+                                                                    $displayBox = preg_match('/^box\s*/i', $boxName) ? $boxName : 'Box ' . $boxName;
+                                                                @endphp
+                                                                <a href="{{ route('katalog.box', ['ruangan' => $namaRuang, 'rak' => $namaRak, 'baris' => $nomorBaris, 'box' => $boxName]) }}" 
                                                                    target="_blank"
-                                                                   title="Klik untuk membuka daftar berkas di dalam Box {{ $boxName }}" 
+                                                                   title="Klik untuk membuka daftar berkas di dalam {{ $displayBox }}" 
                                                                    class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-white hover:bg-emerald-100 hover:text-emerald-900 border border-slate-200 text-slate-700 shadow-2xs transition">
                                                                     <svg class="w-2.5 h-2.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z"></path><path fill-rule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
-                                                                    <span>Box {{ $boxName }}</span>
+                                                                    <span>{{ $displayBox }}</span>
                                                                 </a>
                                                             @endforeach
                                                         </div>

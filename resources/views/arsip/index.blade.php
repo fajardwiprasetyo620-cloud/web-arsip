@@ -128,7 +128,7 @@
                                 <span>Cari</span>
                             </button>
                             
-                            @if(request()->anyFilled(['search', 'ruangan', 'status', 'digital']))
+                            @if(request()->anyFilled(['search', 'ruangan', 'rak', 'status', 'digital', 'retensi']))
                                 <a href="{{ route('arsip.index') }}" class="inline-flex items-center justify-center bg-white hover:bg-gray-100 text-gray-600 font-semibold py-2.5 px-4 text-sm rounded-lg border border-gray-300 shadow-2xs transition duration-200" title="Reset filter">
                                     Reset
                                 </a>

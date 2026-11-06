@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Isi Box {{ $lokasi['box'] }} - E-Arsip BPJS</title>
+    <title>Isi {{ preg_match('/^box\b/i', trim($lokasi['box'])) ? trim($lokasi['box']) : 'Box ' . trim($lokasi['box']) }} - E-Arsip BPJS</title>
     {{-- CSS dari file aplikasi sendiri (hasil npm run build), bukan dari CDN --}}
     @vite('resources/css/app.css')
 </head>
@@ -21,18 +21,20 @@
 
         <!-- Lokasi Box -->
         <div class="p-6 pb-4 text-center">
-            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Box</p>
-            <h2 class="text-3xl font-extrabold text-gray-800 tracking-tight">{{ $lokasi['box'] }}</h2>
+            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Kotak Arsip Fisik</p>
+            <h2 class="text-3xl font-extrabold text-gray-800 tracking-tight">{{ preg_match('/^box\b/i', trim($lokasi['box'])) ? trim($lokasi['box']) : 'Box ' . trim($lokasi['box']) }}</h2>
             <p class="text-gray-600 text-sm mt-1 font-medium">{{ $lokasi['ruangan'] }}</p>
 
             <div class="flex items-center justify-center gap-1.5 mt-3 text-xs">
                 <span class="inline-flex items-center px-2.5 py-1 rounded-md font-bold bg-blue-100 text-blue-900 border border-blue-400 shadow-2xs">
                     {{ preg_match('/^rak\b/i', trim($lokasi['rak'])) ? trim($lokasi['rak']) : 'Rak ' . trim($lokasi['rak']) }}
                 </span>
-                <span class="text-slate-300 font-light">/</span>
-                <span class="inline-flex items-center px-2.5 py-1 rounded-md font-bold bg-emerald-100 text-emerald-900 border border-emerald-400 shadow-2xs">
-                    {{ preg_match('/^baris\b/i', trim($lokasi['baris'])) ? trim($lokasi['baris']) : 'Baris ' . trim($lokasi['baris']) }}
-                </span>
+                @if(!empty($lokasi['baris']))
+                    <span class="text-slate-300 font-light">/</span>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-md font-bold bg-emerald-100 text-emerald-900 border border-emerald-400 shadow-2xs">
+                        {{ preg_match('/^baris\b/i', trim((string)$lokasi['baris'])) ? trim((string)$lokasi['baris']) : 'Baris ' . trim((string)$lokasi['baris']) }}
+                    </span>
+                @endif
             </div>
 
             <div class="flex items-center justify-center gap-2 mt-4">

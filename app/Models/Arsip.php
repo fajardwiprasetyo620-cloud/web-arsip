@@ -88,12 +88,26 @@ class Arsip extends Model
     {
         return $query
             ->when($filter['search'] ?? null, function ($q, $cari) {
-                $q->where(function ($w) use ($cari) {
-                    $w->where('nama_berkas', 'like', "%{$cari}%")
-                        ->orWhere('kode_berkas', 'like', "%{$cari}%");
+                $cariTrim = trim($cari);
+                $q->where(function ($w) use ($cariTrim) {
+                    $w->where('nama_berkas', 'like', "%{$cariTrim}%")
+                        ->orWhere('kode_berkas', 'like', "%{$cariTrim}%")
+                        ->orWhere('rak', 'like', "%{$cariTrim}%")
+                        ->orWhere('box', 'like', "%{$cariTrim}%");
+
+                    // Toleransi variasi nomor box (contoh: "Box 3", "3", "Box 03")
+                    if (preg_match('/^(?:box\s*)?0*(\d+)$/i', $cariTrim, $matches)) {
+                        $nomor = (int) $matches[1];
+                        $pad2 = sprintf('%02d', $nomor);
+                        $w->orWhere('box', 'like', "%Box {$nomor}%")
+                            ->orWhere('box', 'like', "%Box {$pad2}%")
+                            ->orWhere('box', $pad2)
+                            ->orWhere('box', (string) $nomor);
+                    }
                 });
             })
             ->when($filter['ruangan'] ?? null, fn ($q, $ruangan) => $q->where('ruangan', $ruangan))
+            ->when($filter['rak'] ?? null, fn ($q, $rak) => $q->where('rak', $rak))
             ->when($filter['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
             ->when($filter['digital'] ?? null, function ($q, $digital) {
                 if ($digital === 'sudah') {
