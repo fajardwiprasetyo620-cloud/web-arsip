@@ -1,4 +1,3 @@
 {
-  "outputDirectory": "public",
-  "framework": "laravel"
+  "outputDirectory": "public"
 }
