@@ -34,11 +34,10 @@ class ArsipExportExcelTest extends TestCase
         $response = $this->actingAs($this->admin)->get(route('arsip.excel', ['ruangan' => 'Ruang Arsip Kecil']));
 
         $response->assertOk();
-        $expectedName = 'Data_Arsip_' . now()->format('Ymd_His') . '.xlsx';
+        $expectedName = 'Data_Arsip_'.now()->format('Ymd_His').'.xlsx';
 
         Excel::assertDownloaded($expectedName, function (ArsipDataExport $export) {
             return $export->collection()->count() === 3;
         });
     }
 }
-

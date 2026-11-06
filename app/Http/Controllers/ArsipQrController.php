@@ -14,12 +14,12 @@ class ArsipQrController extends Controller
     public function bulk(Request $request)
     {
         $request->validate([
-            'ids'   => 'required|array|min:1|max:100',
+            'ids' => 'required|array|min:1|max:100',
             'ids.*' => 'integer',
         ], [
             'ids.required' => 'Pilih minimal satu arsip untuk dicetak QR Code-nya.',
-            'ids.min'      => 'Pilih minimal satu arsip untuk dicetak QR Code-nya.',
-            'ids.max'      => 'Maksimal 100 QR Code dalam sekali cetak.',
+            'ids.min' => 'Pilih minimal satu arsip untuk dicetak QR Code-nya.',
+            'ids.max' => 'Maksimal 100 QR Code dalam sekali cetak.',
         ]);
 
         $arsips = Arsip::whereIn('id', $request->ids)
@@ -44,13 +44,13 @@ class ArsipQrController extends Controller
     public function box(Request $request)
     {
         $request->validate([
-            'ids'   => 'required_without:semua|array|min:1|max:200',
+            'ids' => 'required_without:semua|array|min:1|max:200',
             'ids.*' => 'integer',
             'semua' => 'nullable|boolean',
         ], [
             'ids.required_without' => 'Pilih minimal satu arsip, atau gunakan tombol "QR Semua Box".',
-            'ids.min'              => 'Pilih minimal satu arsip, atau gunakan tombol "QR Semua Box".',
-            'ids.max'              => 'Maksimal 200 arsip dipilih sekali cetak.',
+            'ids.min' => 'Pilih minimal satu arsip, atau gunakan tombol "QR Semua Box".',
+            'ids.max' => 'Maksimal 200 arsip dipilih sekali cetak.',
         ]);
 
         // Satu baris per box, lengkap dengan jumlah berkas (dihitung dari seluruh isi box)
@@ -64,7 +64,7 @@ class ArsipQrController extends Controller
             ->orderBy('ruangan')->orderBy('rak')->orderBy('baris')->orderBy('box')
             ->get();
 
-        if (!$request->boolean('semua')) {
+        if (! $request->boolean('semua')) {
             $terpilih = Arsip::whereIn('id', $request->ids)
                 ->get(['ruangan', 'rak', 'baris', 'box'])
                 ->map(fn ($a) => $this->kunciBox($a))

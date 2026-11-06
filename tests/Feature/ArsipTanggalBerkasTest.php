@@ -19,10 +19,10 @@ class ArsipTanggalBerkasTest extends TestCase
         return array_merge([
             'kode_berkas' => 'TGL-001',
             'nama_berkas' => 'Berkas uji tanggal',
-            'ruangan'     => 'Ruang Arsip Kecil',
-            'rak'         => 'A',
-            'baris'       => 2,
-            'box'         => '5',
+            'ruangan' => 'Ruang Arsip Kecil',
+            'rak' => 'A',
+            'baris' => 2,
+            'box' => '5',
         ], $extra);
     }
 
@@ -36,7 +36,7 @@ class ArsipTanggalBerkasTest extends TestCase
             ->assertRedirect(route('arsip.index'));
 
         $this->assertDatabaseHas('arsips', [
-            'kode_berkas'    => 'TGL-001',
+            'kode_berkas' => 'TGL-001',
             'tanggal_berkas' => $tanggal,
         ]);
     }
@@ -50,7 +50,7 @@ class ArsipTanggalBerkasTest extends TestCase
             ->assertRedirect(route('arsip.index'));
 
         $this->assertDatabaseHas('arsips', [
-            'kode_berkas'    => 'TGL-001',
+            'kode_berkas' => 'TGL-001',
             'tanggal_berkas' => null,
         ]);
     }
@@ -82,10 +82,10 @@ class ArsipTanggalBerkasTest extends TestCase
         $admin = User::factory()->create();
         $arsip = Arsip::factory()->create([
             'kode_berkas' => 'TGL-001',
-            'ruangan'     => 'Ruang Arsip Kecil',
-            'rak'         => 'A',
-            'baris'       => 2,
-            'box'         => '5',
+            'ruangan' => 'Ruang Arsip Kecil',
+            'rak' => 'A',
+            'baris' => 2,
+            'box' => '5',
         ]);
         $tanggal = now()->subDays(10)->toDateString();
 

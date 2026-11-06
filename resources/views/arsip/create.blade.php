@@ -14,7 +14,7 @@
                     <x-flash />
 
                     <!-- WAJIB: Tambahkan enctype untuk mengizinkan upload file -->
-                    <form action="{{ route('arsip.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('arsip.store') }}" method="POST" enctype="multipart/form-data" onsubmit="AppDialog.loading('Menyimpan Data Arsip...', 'Sedang memvalidasi dan menyimpan data arsip baru...')">
                         @csrf
                         
                         <div class="mb-5">

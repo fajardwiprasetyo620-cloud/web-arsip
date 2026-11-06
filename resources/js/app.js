@@ -16,6 +16,8 @@ window.Chart = Chart;
 import Swal from 'sweetalert2';
 window.Swal = Swal;
 
+import './dialogs';
+
 // Build "complete" menyertakan plugin remove_button bawaan, sama seperti versi
 // CDN (tom-select.complete.min.js) yang dipakai sebelumnya di form peminjaman.
 import TomSelect from 'tom-select/dist/js/tom-select.complete.js';

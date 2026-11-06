@@ -24,9 +24,9 @@ class DashboardMonitoringTest extends TestCase
     {
         $arsip = Arsip::factory()->create([
             'ruangan' => 'Ruang Arsip Kecil',
-            'rak'     => 'Rak A',
-            'baris'   => 1,
-            'box'     => 'Box 01',
+            'rak' => 'Rak A',
+            'baris' => 1,
+            'box' => 'Box 01',
         ]);
 
         Peminjaman::factory()->for($arsip, 'arsip')->terlambat()->create([

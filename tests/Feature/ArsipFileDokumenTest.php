@@ -27,13 +27,13 @@ class ArsipFileDokumenTest extends TestCase
         $file = UploadedFile::fake()->create('dokumen.pdf', 500, 'application/pdf');
 
         $response = $this->actingAs($this->admin)->post(route('arsip.store'), [
-            'kode_berkas'    => 'BERKAS-001',
-            'nama_berkas'    => 'Uraian Berkas 001',
-            'ruangan'        => 'Ruang Arsip Kecil',
-            'rak'            => 'Rak 1',
-            'baris'          => 1,
-            'box'            => 'Box 1',
-            'file_dokumen'   => $file,
+            'kode_berkas' => 'BERKAS-001',
+            'nama_berkas' => 'Uraian Berkas 001',
+            'ruangan' => 'Ruang Arsip Kecil',
+            'rak' => 'Rak 1',
+            'baris' => 1,
+            'box' => 'Box 1',
+            'file_dokumen' => $file,
         ]);
 
         $response->assertRedirect(route('arsip.index'));
@@ -42,30 +42,30 @@ class ArsipFileDokumenTest extends TestCase
         $arsip = Arsip::where('kode_berkas', 'BERKAS-001')->first();
         $this->assertNotNull($arsip);
         $this->assertNotNull($arsip->file_dokumen);
-        $this->assertTrue(Storage::disk('local')->exists('arsip_digital/' . $arsip->file_dokumen));
+        $this->assertTrue(Storage::disk('local')->exists('arsip_digital/'.$arsip->file_dokumen));
     }
 
     public function test_hapus_file_dokumen_lewat_edit(): void
     {
         $file = UploadedFile::fake()->create('dokumen.pdf', 500, 'application/pdf');
         $namaFile = 'berkas-002_random123456.pdf';
-        Storage::disk('local')->put('arsip_digital/' . $namaFile, 'dummy content');
+        Storage::disk('local')->put('arsip_digital/'.$namaFile, 'dummy content');
 
         $arsip = Arsip::factory()->create([
-            'kode_berkas'  => 'BERKAS-002',
-            'ruangan'      => 'Ruang Arsip Kecil',
-            'baris'        => 1,
+            'kode_berkas' => 'BERKAS-002',
+            'ruangan' => 'Ruang Arsip Kecil',
+            'baris' => 1,
             'file_dokumen' => $namaFile,
         ]);
 
         $response = $this->actingAs($this->admin)->put(route('arsip.update', $arsip), [
-            'kode_berkas'  => 'BERKAS-002',
-            'nama_berkas'  => $arsip->nama_berkas,
-            'ruangan'      => 'Ruang Arsip Kecil',
-            'rak'          => $arsip->rak,
-            'baris'        => 1,
-            'box'          => $arsip->box,
-            'hapus_file'   => 1,
+            'kode_berkas' => 'BERKAS-002',
+            'nama_berkas' => $arsip->nama_berkas,
+            'ruangan' => 'Ruang Arsip Kecil',
+            'rak' => $arsip->rak,
+            'baris' => 1,
+            'box' => $arsip->box,
+            'hapus_file' => 1,
         ]);
 
         $response->assertRedirect(route('arsip.index'));
@@ -73,13 +73,13 @@ class ArsipFileDokumenTest extends TestCase
 
         $arsip->refresh();
         $this->assertNull($arsip->file_dokumen);
-        $this->assertFalse(Storage::disk('local')->exists('arsip_digital/' . $namaFile));
+        $this->assertFalse(Storage::disk('local')->exists('arsip_digital/'.$namaFile));
     }
 
     public function test_akses_file_dokumen_privat_oleh_admin(): void
     {
         $namaFile = 'berkas-003_random123456.pdf';
-        Storage::disk('local')->put('arsip_digital/' . $namaFile, 'pdf content');
+        Storage::disk('local')->put('arsip_digital/'.$namaFile, 'pdf content');
 
         $arsip = Arsip::factory()->create([
             'file_dokumen' => $namaFile,

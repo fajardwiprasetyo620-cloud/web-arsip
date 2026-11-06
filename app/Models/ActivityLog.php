@@ -26,9 +26,9 @@ class ActivityLog extends Model
         $nama = auth()->user()?->name ?? 'Sistem';
 
         static::create([
-            'user_name'   => $nama,
-            'action'      => $aksi,
-            'description' => $nama . ' ' . $deskripsi,
+            'user_name' => $nama,
+            'action' => $aksi,
+            'description' => $nama.' '.$deskripsi,
         ]);
     }
 }

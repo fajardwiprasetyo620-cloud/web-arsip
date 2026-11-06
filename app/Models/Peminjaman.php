@@ -22,6 +22,7 @@ class Peminjaman extends Model
         'tanggal_kembali',
         'status',
         'disetujui_oleh',
+        'tanda_tangan',
     ];
 
     // Relasi: Satu peminjaman dimiliki oleh satu arsip
@@ -36,7 +37,7 @@ class Peminjaman extends Model
     public function scopeTerlambat(Builder $query): Builder
     {
         return $query->where('status', 'Dipinjam')
-                     ->whereNotNull('tenggat_waktu')
-                     ->whereDate('tenggat_waktu', '<', today());
+            ->whereNotNull('tenggat_waktu')
+            ->whereDate('tenggat_waktu', '<', today());
     }
 }

@@ -24,13 +24,13 @@ class BeritaAcaraPeminjamanTest extends TestCase
     {
         $arsip = Arsip::factory()->create();
         $pinjam = Peminjaman::factory()->for($arsip, 'arsip')->create([
-            'nama_peminjam'  => 'Agus Pratama',
-            'divisi'         => 'Kepesertaan',
+            'nama_peminjam' => 'Agus Pratama',
+            'divisi' => 'Kepesertaan',
             'tanggal_pinjam' => '2026-10-15',
         ]);
 
         $response = $this->actingAs($this->admin)->get(route('peminjaman.bap', [
-            'nama'    => 'Agus Pratama',
+            'nama' => 'Agus Pratama',
             'tanggal' => '2026-10-15',
         ]));
 
@@ -45,4 +45,3 @@ class BeritaAcaraPeminjamanTest extends TestCase
         $response->assertNotFound();
     }
 }
-

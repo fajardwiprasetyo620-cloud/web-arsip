@@ -9,7 +9,7 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class ActivityLogExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize
+class ActivityLogExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping
 {
     protected ?string $search;
 
@@ -25,10 +25,10 @@ class ActivityLogExport implements FromCollection, WithHeadings, WithMapping, Sh
         if ($this->search) {
             $search = $this->search;
             $query->where(function ($q) use ($search) {
-                $q->where('user_name', 'LIKE', '%' . $search . '%')
-                  ->orWhere('action', 'LIKE', '%' . $search . '%')
-                  ->orWhere('description', 'LIKE', '%' . $search . '%')
-                  ->orWhere('created_at', 'LIKE', '%' . $search . '%');
+                $q->where('user_name', 'LIKE', '%'.$search.'%')
+                    ->orWhere('action', 'LIKE', '%'.$search.'%')
+                    ->orWhere('description', 'LIKE', '%'.$search.'%')
+                    ->orWhere('created_at', 'LIKE', '%'.$search.'%');
             });
         }
 
@@ -60,4 +60,3 @@ class ActivityLogExport implements FromCollection, WithHeadings, WithMapping, Sh
         ];
     }
 }
-

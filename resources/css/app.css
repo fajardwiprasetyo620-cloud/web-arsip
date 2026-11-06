@@ -12,3 +12,217 @@
 [x-cloak] {
     display: none !important;
 }
+
+/* ==========================================================================
+   Kustomisasi Tema Pop-up Modal (SweetAlert2) Resmi E-Arsip BPJS
+   ========================================================================== */
+.swal2-container {
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    background-color: rgba(15, 23, 42, 0.48) !important;
+    z-index: 9999 !important;
+}
+
+.swal2-popup.bpjs-swal-popup {
+    border-radius: 1.5rem !important; /* rounded-3xl */
+    padding: 2rem 1.75rem 1.625rem !important;
+    max-width: 25rem !important;
+    width: 90% !important;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(226, 232, 240, 0.8) !important;
+    background: #ffffff !important;
+    font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, sans-serif !important;
+    overflow: hidden !important;
+}
+
+/* Sembunyikan icon & title bawaan SweetAlert2 agar digantikan struktur kartu modal BPJS */
+.swal2-popup.bpjs-swal-popup .swal2-icon,
+.swal2-popup.bpjs-swal-popup .swal2-title {
+    display: none !important;
+}
+
+.swal2-popup.bpjs-swal-popup .swal2-html-container {
+    font-size: 0.875rem !important;
+    color: #64748b !important;
+    line-height: 1.5 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    overflow: visible !important;
+}
+
+/* Kartu & Elemen Modal Custom BPJS */
+.bpjs-modal-card {
+    text-align: center;
+    width: 100%;
+}
+
+.bpjs-modal-icon {
+    width: 4.25rem;
+    height: 4.25rem;
+    margin: 0 auto 1.25rem auto;
+    border-radius: 1.125rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bpjs-icon-question,
+.bpjs-icon-success {
+    background-color: #ecfdf5 !important;
+    color: #059669 !important;
+    border: 1px solid #a7f3d0 !important;
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.15) !important;
+}
+
+.bpjs-icon-warning {
+    background-color: #fffbeb !important;
+    color: #d97706 !important;
+    border: 1px solid #fde68a !important;
+    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0.15) !important;
+}
+
+.bpjs-icon-danger,
+.bpjs-icon-error {
+    background-color: #fff1f2 !important;
+    color: #e11d48 !important;
+    border: 1px solid #fecdd3 !important;
+    box-shadow: 0 0 0 8px rgba(244, 63, 94, 0.15) !important;
+}
+
+.bpjs-icon-info {
+    background-color: #eff6ff !important;
+    color: #2563eb !important;
+    border: 1px solid #bfdbfe !important;
+    box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.15) !important;
+}
+
+.bpjs-icon-loading {
+    background-color: #ecfdf5 !important;
+    color: #059669 !important;
+    border: 1px solid #a7f3d0 !important;
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.15) !important;
+}
+
+.bpjs-modal-title {
+    font-size: 1.25rem !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    margin: 0 0 0.5rem 0 !important;
+    line-height: 1.35 !important;
+    letter-spacing: -0.015em !important;
+}
+
+.bpjs-modal-body {
+    font-size: 0.875rem !important;
+    color: #64748b !important;
+    line-height: 1.55 !important;
+    margin: 0 auto !important;
+    max-width: 22rem !important;
+}
+
+.bpjs-modal-body p {
+    margin: 0 !important;
+    color: #64748b !important;
+}
+
+/* Actions Container */
+.swal2-popup.bpjs-swal-popup .swal2-actions {
+    margin-top: 1.5rem !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+/* Tombol Utama (Confirm / Submit) - Hijau Gradien BPJS */
+.swal2-popup.bpjs-swal-popup .bpjs-btn-primary {
+    background: linear-gradient(135deg, #059669 0%, #0d9488 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    font-size: 0.875rem !important;
+    font-weight: 700 !important;
+    padding: 0.65rem 1.4rem !important;
+    min-width: 7.5rem !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 4px 12px 0 rgba(5, 150, 105, 0.32) !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease-in-out !important;
+    outline: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    user-select: none !important;
+}
+
+.swal2-popup.bpjs-swal-popup .bpjs-btn-primary:hover {
+    background: linear-gradient(135deg, #047857 0%, #0f766e 100%) !important;
+    box-shadow: 0 6px 18px 0 rgba(5, 150, 105, 0.42) !important;
+    transform: translateY(-1px) !important;
+}
+
+.swal2-popup.bpjs-swal-popup .bpjs-btn-primary:active {
+    transform: translateY(0) scale(0.97) !important;
+}
+
+/* Tombol Bahaya (Hapus / Danger) - Merah Gradien */
+.swal2-popup.bpjs-swal-popup .bpjs-btn-danger {
+    background: linear-gradient(135deg, #e11d48 0%, #dc2626 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    font-size: 0.875rem !important;
+    font-weight: 700 !important;
+    padding: 0.65rem 1.4rem !important;
+    min-width: 7.5rem !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 4px 12px 0 rgba(225, 29, 72, 0.32) !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease-in-out !important;
+    outline: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    user-select: none !important;
+}
+
+.swal2-popup.bpjs-swal-popup .bpjs-btn-danger:hover {
+    background: linear-gradient(135deg, #be123c 0%, #b91c1c 100%) !important;
+    box-shadow: 0 6px 18px 0 rgba(225, 29, 72, 0.42) !important;
+    transform: translateY(-1px) !important;
+}
+
+.swal2-popup.bpjs-swal-popup .bpjs-btn-danger:active {
+    transform: translateY(0) scale(0.97) !important;
+}
+
+/* Tombol Batal (Secondary) - Slate Netral */
+.swal2-popup.bpjs-swal-popup .bpjs-btn-secondary {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0 !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    padding: 0.65rem 1.25rem !important;
+    min-width: 6rem !important;
+    border-radius: 0.75rem !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease-in-out !important;
+    outline: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    user-select: none !important;
+}
+
+.swal2-popup.bpjs-swal-popup .bpjs-btn-secondary:hover {
+    background: #e2e8f0 !important;
+    color: #0f172a !important;
+}
+
+.swal2-popup.bpjs-swal-popup .bpjs-btn-secondary:active {
+    transform: scale(0.97) !important;
+}
+

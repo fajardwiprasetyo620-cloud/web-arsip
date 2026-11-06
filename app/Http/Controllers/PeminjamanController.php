@@ -23,12 +23,12 @@ class PeminjamanController extends Controller
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('nama_peminjam', 'like', '%' . $search . '%')
-                  ->orWhere('divisi', 'like', '%' . $search . '%')
-                  ->orWhereHas('arsip', function ($qArsip) use ($search) {
-                      $qArsip->where('nama_berkas', 'like', '%' . $search . '%')
-                             ->orWhere('kode_berkas', 'like', '%' . $search . '%');
-                  });
+                $q->where('nama_peminjam', 'like', '%'.$search.'%')
+                    ->orWhere('divisi', 'like', '%'.$search.'%')
+                    ->orWhereHas('arsip', function ($qArsip) use ($search) {
+                        $qArsip->where('nama_berkas', 'like', '%'.$search.'%')
+                            ->orWhere('kode_berkas', 'like', '%'.$search.'%');
+                    });
             });
         }
 
@@ -40,14 +40,14 @@ class PeminjamanController extends Controller
         $peminjamans = $query->get();
         $hariIni = now()->startOfDay();
         $isTerlambat = fn ($peminjaman) => $peminjaman->status === 'Dipinjam'
-            && !empty($peminjaman->tenggat_waktu)
+            && ! empty($peminjaman->tenggat_waktu)
             && $hariIni->gt(Carbon::parse($peminjaman->tenggat_waktu)->startOfDay());
 
         $daftarTerlambat = $peminjamans
             ->filter($isTerlambat)
             ->sortBy(fn ($peminjaman) => Carbon::parse($peminjaman->tenggat_waktu)->startOfDay());
         $daftarDipinjam = $peminjamans
-            ->filter(fn ($peminjaman) => $peminjaman->status === 'Dipinjam' && !$isTerlambat($peminjaman))
+            ->filter(fn ($peminjaman) => $peminjaman->status === 'Dipinjam' && ! $isTerlambat($peminjaman))
             ->sortByDesc('created_at');
         $daftarDikembalikan = $peminjamans
             ->where('status', 'Dikembalikan')
@@ -84,18 +84,20 @@ class PeminjamanController extends Controller
     public function create()
     {
         $arsips = Arsip::where('status', 'Tersedia')->orderBy('nama_berkas', 'asc')->get();
+
         return view('peminjaman.create', compact('arsips'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'arsip_id'       => 'required|array|min:1',
-            'arsip_id.*'     => ['integer', Rule::exists('arsips', 'id')->whereNull('deleted_at')],
-            'nama_peminjam'  => 'required|string|max:255',
-            'divisi'         => 'required|string|max:255',
+            'arsip_id' => 'required|array|min:1',
+            'arsip_id.*' => ['integer', Rule::exists('arsips', 'id')->whereNull('deleted_at')],
+            'nama_peminjam' => 'required|string|max:255',
+            'divisi' => 'required|string|max:255',
             'tanggal_pinjam' => 'required|date',
-            'tenggat_waktu'  => 'required|date|after_or_equal:tanggal_pinjam',
+            'tenggat_waktu' => 'required|date|after_or_equal:tanggal_pinjam',
+            'tanda_tangan' => 'nullable|string',
         ]);
 
         $ids = array_values(array_unique($data['arsip_id']));
@@ -109,30 +111,31 @@ class PeminjamanController extends Controller
 
             if ($arsips->count() !== count($ids) || $tidakTersedia->isNotEmpty()) {
                 $daftar = $tidakTersedia->isNotEmpty()
-                    ? ': ' . $tidakTersedia->pluck('kode_berkas')->implode(', ')
+                    ? ': '.$tidakTersedia->pluck('kode_berkas')->implode(', ')
                     : '';
 
                 throw ValidationException::withMessages([
-                    'arsip_id' => 'Ada arsip yang sudah tidak tersedia' . $daftar . '. Silakan pilih arsip lain.',
+                    'arsip_id' => 'Ada arsip yang sudah tidak tersedia'.$daftar.'. Silakan pilih arsip lain.',
                 ]);
             }
 
             foreach ($arsips as $arsip) {
                 Peminjaman::create([
-                    'arsip_id'       => $arsip->id,
-                    'nama_peminjam'  => $data['nama_peminjam'],
-                    'divisi'         => $data['divisi'],
+                    'arsip_id' => $arsip->id,
+                    'nama_peminjam' => $data['nama_peminjam'],
+                    'divisi' => $data['divisi'],
                     'tanggal_pinjam' => $data['tanggal_pinjam'],
-                    'tenggat_waktu'  => $data['tenggat_waktu'],
-                    'status'         => 'Dipinjam',
+                    'tenggat_waktu' => $data['tenggat_waktu'],
+                    'tanda_tangan' => $data['tanda_tangan'] ?? null,
+                    'status' => 'Dipinjam',
                 ]);
 
                 $arsip->update(['status' => 'Dipinjam']);
             }
 
-            ActivityLog::catat('PINJAM', 'mencatat peminjaman ' . $arsips->count() . ' arsip ('
-                . $arsips->pluck('kode_berkas')->implode(', ') . ') oleh '
-                . $data['nama_peminjam'] . ' - ' . $data['divisi'] . '.');
+            ActivityLog::catat('PINJAM', 'mencatat peminjaman '.$arsips->count().' arsip ('
+                .$arsips->pluck('kode_berkas')->implode(', ').') oleh '
+                .$data['nama_peminjam'].' - '.$data['divisi'].'.');
         });
 
         return redirect()->route('peminjaman.index')->with('success', 'Data peminjaman arsip berhasil dicatat!');
@@ -151,13 +154,14 @@ class PeminjamanController extends Controller
 
             if ($pinjam->status === 'Dikembalikan') {
                 $sudahDikembalikan = true;
+
                 return;
             }
 
             $pinjam->update([
-                'status'          => 'Dikembalikan',
+                'status' => 'Dikembalikan',
                 'tanggal_kembali' => now(),
-                'disetujui_oleh'  => auth()->user()->name,
+                'disetujui_oleh' => auth()->user()->name,
             ]);
 
             // withTrashed: tetap aman walau arsipnya sudah masuk riwayat hapus
@@ -165,7 +169,7 @@ class PeminjamanController extends Controller
             $arsip?->update(['status' => 'Tersedia']);
 
             ActivityLog::catat('KEMBALI', 'memproses pengembalian arsip '
-                . ($arsip?->kode_berkas ?? '#' . $pinjam->arsip_id) . ' dari ' . $pinjam->nama_peminjam . '.');
+                .($arsip?->kode_berkas ?? '#'.$pinjam->arsip_id).' dari '.$pinjam->nama_peminjam.'.');
         });
 
         if ($sudahDikembalikan) {
@@ -184,12 +188,12 @@ class PeminjamanController extends Controller
                 ->with('error', 'Peminjaman ini masih berstatus Dipinjam. Proses pengembaliannya terlebih dahulu.');
         }
 
-        $kode = $peminjaman->arsip?->kode_berkas ?? '#' . $peminjaman->arsip_id;
+        $kode = $peminjaman->arsip?->kode_berkas ?? '#'.$peminjaman->arsip_id;
         $nama = $peminjaman->nama_peminjam;
 
         $peminjaman->delete();
 
-        ActivityLog::catat('HAPUS PEMINJAMAN', 'menghapus riwayat peminjaman arsip ' . $kode . ' oleh ' . $nama . '.');
+        ActivityLog::catat('HAPUS PEMINJAMAN', 'menghapus riwayat peminjaman arsip '.$kode.' oleh '.$nama.'.');
 
         return redirect()->route('peminjaman.index')->with('success', 'Riwayat peminjaman berhasil dihapus!');
     }
@@ -206,14 +210,14 @@ class PeminjamanController extends Controller
 
     public function exportPdfSelected(Request $request)
     {
-        if (!$request->has('peminjaman_ids') || empty($request->peminjaman_ids)) {
+        if (! $request->has('peminjaman_ids') || empty($request->peminjaman_ids)) {
             return redirect()->back()->with('error', 'Pilih minimal satu data untuk dicetak!');
         }
 
         $peminjamans = Peminjaman::with('arsip')
-                        ->whereIn('id', $request->peminjaman_ids)
-                        ->orderBy('tanggal_pinjam', 'desc')
-                        ->get();
+            ->whereIn('id', $request->peminjaman_ids)
+            ->orderBy('tanggal_pinjam', 'desc')
+            ->get();
 
         $pdf = Pdf::loadView('peminjaman.pdf', compact('peminjamans'));
         $pdf->setPaper('A4', 'landscape');
@@ -235,8 +239,8 @@ class PeminjamanController extends Controller
             $peminjamans = $query->where('id', $id)->get();
         } elseif ($nama && $tanggal) {
             $peminjamans = $query->where('nama_peminjam', $nama)
-                                 ->whereDate('tanggal_pinjam', $tanggal)
-                                 ->get();
+                ->whereDate('tanggal_pinjam', $tanggal)
+                ->get();
         } else {
             abort(404, 'Parameter Berita Acara tidak lengkap.');
         }
@@ -246,12 +250,13 @@ class PeminjamanController extends Controller
         }
 
         $first = $peminjamans->first();
-        $nomorBap = 'BAP/ARSIP/' . \Carbon\Carbon::parse($first->tanggal_pinjam)->format('Ymd') . '/' . str_pad($first->id, 4, '0', STR_PAD_LEFT);
+        $nomorBap = 'BAP/ARSIP/'.\Carbon\Carbon::parse($first->tanggal_pinjam)->format('Ymd').'/'.str_pad($first->id, 4, '0', STR_PAD_LEFT);
 
         $pdf = Pdf::loadView('peminjaman.bap', compact('peminjamans', 'first', 'nomorBap'));
         $pdf->setPaper('A4', 'portrait');
 
-        $slugName = \Illuminate\Support\Str::slug($first->nama_peminjam . '-' . $first->tanggal_pinjam);
+        $slugName = \Illuminate\Support\Str::slug($first->nama_peminjam.'-'.$first->tanggal_pinjam);
+
         return $pdf->stream("Berita_Acara_Peminjaman_{$slugName}.pdf");
     }
 }

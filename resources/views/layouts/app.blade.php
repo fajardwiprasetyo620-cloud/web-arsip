@@ -7,10 +7,16 @@
 
         <title>{{ config('app.name', 'E-Arsip BPJS') }}</title>
 
+        <!-- Pastikan tema terang resmi BPJS aktif konsisten -->
+        <script>
+            document.documentElement.classList.remove('dark');
+            localStorage.removeItem('theme');
+        </script>
+
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased text-gray-800">
+    <body class="font-sans antialiased text-gray-800 bg-stone-100">
         <!-- Flex-col ditambahkan agar footer selalu menempel di bawah -->
         <div class="min-h-screen bg-stone-100 flex flex-col">
             
@@ -42,7 +48,12 @@
                     </div>
                 </div>
             </footer>
+                    </div>
+                </div>
+            </footer>
 
         </div>
+
+        <x-command-palette />
     </body>
 </html>

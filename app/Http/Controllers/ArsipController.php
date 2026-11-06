@@ -25,11 +25,12 @@ class ArsipController extends Controller
 {
     /** File dokumen disimpan di disk privat (storage/app/arsip_digital), bukan di folder publik. */
     private const DISK = 'local';
-    private const DIR  = 'arsip_digital';
+
+    private const DIR = 'arsip_digital';
 
     public function index(Request $request)
     {
-        $arsips = Arsip::filter($request->only('search', 'ruangan', 'status', 'digital'))
+        $arsips = Arsip::filter($request->only('search', 'ruangan', 'status', 'digital', 'retensi'))
             ->orderBy('kode_berkas')
             ->paginate(15)
             ->withQueryString();
@@ -65,7 +66,8 @@ class ArsipController extends Controller
         try {
             $arsip = DB::transaction(function () use ($data) {
                 $baru = Arsip::create($data);
-                ActivityLog::catat('TAMBAH', 'menambahkan arsip baru: ' . $baru->kode_berkas);
+                ActivityLog::catat('TAMBAH', 'menambahkan arsip baru: '.$baru->kode_berkas);
+
                 return $baru;
             });
         } catch (\Throwable $e) {
@@ -92,33 +94,33 @@ class ArsipController extends Controller
         // 2. Deteksi perubahan kolom
         $perubahan = [];
         $label = [
-            'ruangan'        => 'Ruangan',
-            'rak'            => 'Rak',
-            'baris'          => 'Baris',
-            'box'            => 'Box',
-            'kode_berkas'    => 'Kode Berkas',
-            'nama_berkas'    => 'Nama Berkas',
+            'ruangan' => 'Ruangan',
+            'rak' => 'Rak',
+            'baris' => 'Baris',
+            'box' => 'Box',
+            'kode_berkas' => 'Kode Berkas',
+            'nama_berkas' => 'Nama Berkas',
             'tanggal_berkas' => 'Tanggal Berkas',
         ];
         foreach ($label as $kolom => $nama) {
             if ($arsip->isDirty($kolom)) {
-                $perubahan[] = $nama . ' (' . ($arsip->getOriginal($kolom) ?? '-') . ' ➔ ' . ($arsip->{$kolom} ?? '-') . ')';
+                $perubahan[] = $nama.' ('.($arsip->getOriginal($kolom) ?? '-').' ➔ '.($arsip->{$kolom} ?? '-').')';
             }
         }
 
         // 3. Kelola file dokumen: unggah baru atau hapus yang ada
         $fileLamaAkanDihapus = null;
-        $fileBaruTersimpan   = null;
+        $fileBaruTersimpan = null;
 
         if ($request->hasFile('file_dokumen')) {
             $fileLamaAkanDihapus = $arsip->getOriginal('file_dokumen');
-            $fileBaruTersimpan   = $this->simpanFile($request->file('file_dokumen'), $arsip->kode_berkas);
+            $fileBaruTersimpan = $this->simpanFile($request->file('file_dokumen'), $arsip->kode_berkas);
             $arsip->file_dokumen = $fileBaruTersimpan;
-            $perubahan[]         = 'File dokumen digital diperbarui';
+            $perubahan[] = 'File dokumen digital diperbarui';
         } elseif ($request->boolean('hapus_file') && $arsip->file_dokumen) {
             $fileLamaAkanDihapus = $arsip->file_dokumen;
             $arsip->file_dokumen = null;
-            $perubahan[]         = 'File dokumen digital dihapus';
+            $perubahan[] = 'File dokumen digital dihapus';
         }
 
         // Jika tidak ada perubahan sama sekali, hindari query save dan log aktivitas palsu
@@ -126,13 +128,13 @@ class ArsipController extends Controller
             return redirect()->route('arsip.index')->with('info', 'Tidak ada perubahan data yang disimpan.');
         }
 
-        $detailPerubahan = !empty($perubahan) ? implode(', ', $perubahan) : 'data umum';
+        $detailPerubahan = ! empty($perubahan) ? implode(', ', $perubahan) : 'data umum';
 
         // 4. Simpan dalam transaksi database
         try {
             DB::transaction(function () use ($arsip, $detailPerubahan) {
                 $arsip->save();
-                ActivityLog::catat('EDIT', 'mengubah ' . $detailPerubahan . ' pada arsip ' . $arsip->kode_berkas);
+                ActivityLog::catat('EDIT', 'mengubah '.$detailPerubahan.' pada arsip '.$arsip->kode_berkas);
             });
         } catch (\Throwable $e) {
             // Hapus file baru jika operasi database gagal
@@ -154,13 +156,13 @@ class ArsipController extends Controller
     {
         if ($arsip->sedangDipinjam()) {
             return redirect()->route('arsip.index')
-                ->with('error', 'Arsip ' . $arsip->kode_berkas . ' sedang dipinjam. Proses pengembaliannya dulu sebelum dihapus.');
+                ->with('error', 'Arsip '.$arsip->kode_berkas.' sedang dipinjam. Proses pengembaliannya dulu sebelum dihapus.');
         }
 
         $kode = $arsip->kode_berkas;
         $arsip->delete();
 
-        ActivityLog::catat('HAPUS', 'memindahkan arsip ' . $kode . ' ke riwayat hapus.');
+        ActivityLog::catat('HAPUS', 'memindahkan arsip '.$kode.' ke riwayat hapus.');
 
         return redirect()->route('arsip.index')->with('success', 'Data Berhasil Dihapus!');
     }
@@ -171,7 +173,7 @@ class ArsipController extends Controller
      */
     public function file(Arsip $arsip)
     {
-        $relativePath = self::DIR . '/' . $arsip->file_dokumen;
+        $relativePath = self::DIR.'/'.$arsip->file_dokumen;
 
         abort_unless($arsip->file_dokumen && Storage::disk(self::DISK)->exists($relativePath), 404);
 
@@ -197,7 +199,7 @@ class ArsipController extends Controller
         $arsip = Arsip::onlyTrashed()->findOrFail($id);
         $arsip->restore();
 
-        ActivityLog::catat('PULIHKAN', 'memulihkan arsip ' . $arsip->kode_berkas . ' dari riwayat hapus.');
+        ActivityLog::catat('PULIHKAN', 'memulihkan arsip '.$arsip->kode_berkas.' dari riwayat hapus.');
 
         return redirect()->route('arsip.history')->with('success', 'Arsip berhasil dipulihkan!');
     }
@@ -216,19 +218,19 @@ class ArsipController extends Controller
             $this->hapusFile($file);
         }
 
-        ActivityLog::catat('HAPUS PERMANEN', 'menghapus permanen arsip ' . $kode . ' dari riwayat hapus.');
+        ActivityLog::catat('HAPUS PERMANEN', 'menghapus permanen arsip '.$kode.' dari riwayat hapus.');
 
-        return redirect()->route('arsip.history')->with('success', 'Arsip ' . $kode . ' berhasil dihapus permanen!');
+        return redirect()->route('arsip.history')->with('success', 'Arsip '.$kode.' berhasil dihapus permanen!');
     }
 
     public function bulkDelete(Request $request)
     {
         $request->validate([
-            'ids'   => 'required|array|min:1',
+            'ids' => 'required|array|min:1',
             'ids.*' => 'integer',
         ], [
             'ids.required' => 'Tidak ada data yang dipilih untuk dihapus.',
-            'ids.min'      => 'Tidak ada data yang dipilih untuk dihapus.',
+            'ids.min' => 'Tidak ada data yang dipilih untuk dihapus.',
         ]);
 
         $arsips = Arsip::whereIn('id', $request->ids)->get();
@@ -243,15 +245,15 @@ class ArsipController extends Controller
 
         DB::transaction(function () use ($bisaDihapus) {
             Arsip::whereIn('id', $bisaDihapus->pluck('id'))->delete();
-            ActivityLog::catat('HAPUS MASSAL', 'menghapus ' . $bisaDihapus->count() . ' arsip sekaligus.');
+            ActivityLog::catat('HAPUS MASSAL', 'menghapus '.$bisaDihapus->count().' arsip sekaligus.');
         });
 
         $redirect = redirect()->route('arsip.index')
-            ->with('success', $bisaDihapus->count() . ' Arsip berhasil dihapus sekaligus!');
+            ->with('success', $bisaDihapus->count().' Arsip berhasil dihapus sekaligus!');
 
         if ($dipinjam->isNotEmpty()) {
-            $redirect->with('warning', $dipinjam->count() . ' arsip dilewati karena sedang dipinjam: '
-                . $dipinjam->pluck('kode_berkas')->implode(', ') . '.');
+            $redirect->with('warning', $dipinjam->count().' arsip dilewati karena sedang dipinjam: '
+                .$dipinjam->pluck('kode_berkas')->implode(', ').'.');
         }
 
         return $redirect;
@@ -260,7 +262,34 @@ class ArsipController extends Controller
     public function printQr(Arsip $arsip)
     {
         $url = route('katalog.show', $arsip->id);
+
         return view('arsip.qrcode', compact('arsip', 'url'));
+    }
+
+    /**
+     * Endpoint live search untuk Command Palette (Ctrl + K)
+     */
+    public function quickSearch(Request $request)
+    {
+        $q = trim((string) $request->get('q', ''));
+        if ($q === '') {
+            $arsips = Arsip::latest()->take(6)->get();
+        } else {
+            $arsips = Arsip::filter(['search' => $q])->take(8)->get();
+        }
+
+        return response()->json([
+            'arsips' => $arsips->map(fn (Arsip $a) => [
+                'id' => $a->id,
+                'kode' => $a->kode_berkas,
+                'nama' => $a->nama_berkas,
+                'lokasi' => "{$a->ruangan} • {$a->rak} (Brs {$a->baris}, Box {$a->box})",
+                'status' => $a->status,
+                'has_file' => ! empty($a->file_dokumen),
+                'url' => route('katalog.show', $a->id),
+                'edit_url' => route('arsip.edit', $a->id),
+            ]),
+        ]);
     }
 
     // =========================================================================
@@ -270,7 +299,7 @@ class ArsipController extends Controller
     {
         $slug = Str::slug($kode) ?: 'berkas';
         // Akhiran acak agar nama file tidak bisa ditebak
-        $nama = $slug . '_' . Str::random(12) . '.' . $file->extension();
+        $nama = $slug.'_'.Str::random(12).'.'.$file->extension();
         $file->storeAs(self::DIR, $nama, self::DISK);
 
         return $nama;
@@ -282,7 +311,7 @@ class ArsipController extends Controller
             return;
         }
 
-        Storage::disk(self::DISK)->delete(self::DIR . '/' . $nama);
-        Storage::disk('public')->delete(self::DIR . '/' . $nama); // sisa file lama, jika ada
+        Storage::disk(self::DISK)->delete(self::DIR.'/'.$nama);
+        Storage::disk('public')->delete(self::DIR.'/'.$nama); // sisa file lama, jika ada
     }
 }

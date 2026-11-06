@@ -17,10 +17,10 @@ class LogAktivitasController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('user_name', 'LIKE', '%' . $search . '%')
-                  ->orWhere('action', 'LIKE', '%' . $search . '%')
-                  ->orWhere('description', 'LIKE', '%' . $search . '%')
-                  ->orWhere('created_at', 'LIKE', '%' . $search . '%');
+                $q->where('user_name', 'LIKE', '%'.$search.'%')
+                    ->orWhere('action', 'LIKE', '%'.$search.'%')
+                    ->orWhere('description', 'LIKE', '%'.$search.'%')
+                    ->orWhere('created_at', 'LIKE', '%'.$search.'%');
             });
         }
 
@@ -32,7 +32,7 @@ class LogAktivitasController extends Controller
     public function excel(Request $request): BinaryFileResponse
     {
         $search = $request->query('search');
-        $namaFile = 'log-aktivitas-arsip-' . now()->format('Y-m-d_His') . '.xlsx';
+        $namaFile = 'log-aktivitas-arsip-'.now()->format('Y-m-d_His').'.xlsx';
 
         return Excel::download(new ActivityLogExport($search), $namaFile);
     }

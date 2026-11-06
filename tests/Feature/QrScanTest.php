@@ -14,4 +14,3 @@ class QrScanTest extends TestCase
         $response->assertSee('Pemindai QR Code');
     }
 }
-

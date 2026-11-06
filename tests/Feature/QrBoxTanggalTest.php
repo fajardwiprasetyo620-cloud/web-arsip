@@ -16,15 +16,15 @@ class QrBoxTanggalTest extends TestCase
 
     private array $lokasi = [
         'ruangan' => 'Ruang Arsip Kecil',
-        'rak'     => 'A',
-        'baris'   => 3,
-        'box'     => '3',
+        'rak' => 'A',
+        'baris' => 3,
+        'box' => '3',
     ];
 
     private function arsipDi(string $kode, ?string $tanggal, array $extra = []): Arsip
     {
         return Arsip::factory()->create(array_merge($this->lokasi, [
-            'kode_berkas'    => $kode,
+            'kode_berkas' => $kode,
             'tanggal_berkas' => $tanggal,
         ], $extra));
     }

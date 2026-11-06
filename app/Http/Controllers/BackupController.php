@@ -13,11 +13,10 @@ class BackupController extends Controller
         $path = $backupService->backup();
         $fileName = basename($path);
 
-        ActivityLog::catat('BACKUP', 'mengunduh cadangan database sistem: ' . $fileName);
+        ActivityLog::catat('BACKUP', 'mengunduh cadangan database sistem: '.$fileName);
 
         return response()->download($path, $fileName, [
             'Content-Type' => 'application/sql',
         ]);
     }
 }
-

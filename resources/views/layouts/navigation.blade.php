@@ -32,8 +32,19 @@
                 </div>
             </div>
 
+            <!-- Command Palette Trigger Button (Desktop) -->
+            <div class="hidden lg:flex items-center ms-auto me-3">
+                <button type="button" 
+                        @click="$dispatch('open-command-palette')"
+                        class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-500 bg-slate-100 hover:bg-slate-200 hover:text-slate-700 rounded-xl border border-slate-200 transition shadow-2xs cursor-pointer">
+                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <span>Cari Arsip / Menu...</span>
+                    <kbd class="px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 bg-white border border-slate-200 rounded-md">Ctrl K</kbd>
+                </button>
+            </div>
+
             <!-- Settings Dropdown -->
-            <div class="hidden lg:flex lg:items-center lg:ms-6">
+            <div class="hidden lg:flex lg:items-center">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
@@ -62,7 +73,7 @@
 
                             <x-dropdown-link :href="route('logout')"
                                     onclick="event.preventDefault();
-                                                this.closest('form').submit();">
+                                                konfirmasiLogout(event, this.closest('form'));">
                                 {{ __('Log Out') }}
                             </x-dropdown-link>
                         </form>
@@ -70,8 +81,14 @@
                 </x-dropdown>
             </div>
 
-            <!-- Hamburger (Mobile) -->
-            <div class="-me-2 flex items-center lg:hidden">
+            <!-- Search & Hamburger (Mobile) -->
+            <div class="-me-2 flex items-center gap-1 lg:hidden">
+                <button type="button" 
+                        @click="$dispatch('open-command-palette')" 
+                        class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition" 
+                        title="Pencarian Cepat">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                </button>
                 <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -125,7 +142,7 @@
                     @csrf
                     <x-responsive-nav-link :href="route('logout')"
                             onclick="event.preventDefault();
-                                        this.closest('form').submit();">
+                                        konfirmasiLogout(event, this.closest('form'));">
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>
                 </form>

@@ -22,12 +22,12 @@ class ArsipDigitalFilterTest extends TestCase
     public function test_filter_arsip_digital_sudah_scan(): void
     {
         $arsipDenganFile = Arsip::factory()->create([
-            'kode_berkas'  => 'ARSIP-DIGITAL-01',
+            'kode_berkas' => 'ARSIP-DIGITAL-01',
             'file_dokumen' => 'test.pdf',
         ]);
 
         $arsipTanpaFile = Arsip::factory()->create([
-            'kode_berkas'  => 'ARSIP-FISIK-01',
+            'kode_berkas' => 'ARSIP-FISIK-01',
             'file_dokumen' => null,
         ]);
 
@@ -41,12 +41,12 @@ class ArsipDigitalFilterTest extends TestCase
     public function test_filter_arsip_digital_hanya_fisik(): void
     {
         $arsipDenganFile = Arsip::factory()->create([
-            'kode_berkas'  => 'ARSIP-DIGITAL-02',
+            'kode_berkas' => 'ARSIP-DIGITAL-02',
             'file_dokumen' => 'test.pdf',
         ]);
 
         $arsipTanpaFile = Arsip::factory()->create([
-            'kode_berkas'  => 'ARSIP-FISIK-02',
+            'kode_berkas' => 'ARSIP-FISIK-02',
             'file_dokumen' => null,
         ]);
 
@@ -57,4 +57,3 @@ class ArsipDigitalFilterTest extends TestCase
         $response->assertDontSee('ARSIP-DIGITAL-02');
     }
 }
-

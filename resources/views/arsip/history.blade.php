@@ -35,7 +35,7 @@
                                     <div class="flex items-center justify-center gap-2">
                                         <form action="{{ route('arsip.restore', $arsip->id) }}" method="POST" class="inline-block">
                                             @csrf
-                                            <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-1.5 px-3 rounded-lg shadow-sm text-xs inline-flex items-center gap-1 transition duration-200" onclick="return confirm('Pulihkan arsip ini kembali ke daftar utama?')">
+                                            <button type="button" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-1.5 px-3 rounded-lg shadow-sm text-xs inline-flex items-center gap-1 transition duration-200" onclick="konfirmasiPulihkan(event, 'Pulihkan arsip {{ $arsip->kode_berkas }} kembali ke daftar arsip aktif?', this.closest('form'))">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
                                                 Pulihkan
                                             </button>
@@ -44,7 +44,7 @@
                                         <form action="{{ route('arsip.forceDelete', $arsip->id) }}" method="POST" class="inline-block">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold py-1.5 px-3 rounded-lg shadow-sm text-xs inline-flex items-center gap-1 transition duration-200" onclick="return confirm('PERINGATAN: Arsip {{ $arsip->kode_berkas }} dan file fisiknya akan dihapus permanen dari sistem. Lanjutkan?')">
+                                            <button type="button" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold py-1.5 px-3 rounded-lg shadow-sm text-xs inline-flex items-center gap-1 transition duration-200" onclick="konfirmasiHapusPermanen(event, 'PERINGATAN: Arsip {{ $arsip->kode_berkas }} dan file fisiknya akan dihapus permanen dari server. Lanjutkan?', this.closest('form'))">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                                 Hapus Permanen
                                             </button>

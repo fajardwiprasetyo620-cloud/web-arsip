@@ -20,6 +20,7 @@ class PindahkanFileArsip extends Command
         foreach ($publik->files('arsip_digital') as $path) {
             if ($privat->exists($path)) {
                 $this->warn("Dilewati (sudah ada di penyimpanan privat): {$path}");
+
                 continue;
             }
 

@@ -16,21 +16,21 @@ class PeminjamanFactory extends Factory
     public function definition(): array
     {
         return [
-            'arsip_id'       => Arsip::factory(),
-            'nama_peminjam'  => $this->faker->name(),
-            'divisi'         => 'Kepesertaan',
+            'arsip_id' => Arsip::factory(),
+            'nama_peminjam' => $this->faker->name(),
+            'divisi' => 'Kepesertaan',
             'tanggal_pinjam' => now()->toDateString(),
-            'tenggat_waktu'  => now()->addDays(7)->toDateString(),
-            'status'         => 'Dipinjam',
+            'tenggat_waktu' => now()->addDays(7)->toDateString(),
+            'status' => 'Dipinjam',
         ];
     }
 
     public function dikembalikan(): static
     {
         return $this->state(fn () => [
-            'status'          => 'Dikembalikan',
+            'status' => 'Dikembalikan',
             'tanggal_kembali' => now()->toDateString(),
-            'disetujui_oleh'  => 'Admin Uji',
+            'disetujui_oleh' => 'Admin Uji',
         ]);
     }
 
@@ -38,7 +38,7 @@ class PeminjamanFactory extends Factory
     {
         return $this->state(fn () => [
             'tanggal_pinjam' => now()->subDays(10)->toDateString(),
-            'tenggat_waktu'  => now()->subDays(3)->toDateString(),
+            'tenggat_waktu' => now()->subDays(3)->toDateString(),
         ]);
     }
 }

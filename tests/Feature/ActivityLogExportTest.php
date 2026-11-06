@@ -26,8 +26,8 @@ class ActivityLogExportTest extends TestCase
     {
         Carbon::setTestNow(now());
         ActivityLog::create([
-            'user_name'   => 'Admin Test',
-            'action'      => 'TAMBAH',
+            'user_name' => 'Admin Test',
+            'action' => 'TAMBAH',
             'description' => 'Admin Test menambahkan arsip baru: ARS-001',
         ]);
 
@@ -36,7 +36,7 @@ class ActivityLogExportTest extends TestCase
         $response = $this->actingAs($this->admin)->get(route('arsip.logs.excel'));
 
         $response->assertSuccessful();
-        $expectedName = 'log-aktivitas-arsip-' . now()->format('Y-m-d_His') . '.xlsx';
+        $expectedName = 'log-aktivitas-arsip-'.now()->format('Y-m-d_His').'.xlsx';
         Excel::assertDownloaded($expectedName, function (ActivityLogExport $export) {
             return $export->collection()->count() === 1;
         });
@@ -46,14 +46,14 @@ class ActivityLogExportTest extends TestCase
     {
         Carbon::setTestNow(now());
         ActivityLog::create([
-            'user_name'   => 'Admin Fajar',
-            'action'      => 'TAMBAH',
+            'user_name' => 'Admin Fajar',
+            'action' => 'TAMBAH',
             'description' => 'Admin Fajar menambahkan arsip baru: ARS-100',
         ]);
 
         ActivityLog::create([
-            'user_name'   => 'Admin Firman',
-            'action'      => 'HAPUS',
+            'user_name' => 'Admin Firman',
+            'action' => 'HAPUS',
             'description' => 'Admin Firman menghapus arsip: ARS-200',
         ]);
 
@@ -62,10 +62,9 @@ class ActivityLogExportTest extends TestCase
         $response = $this->actingAs($this->admin)->get(route('arsip.logs.excel', ['search' => 'Fajar']));
 
         $response->assertSuccessful();
-        $expectedName = 'log-aktivitas-arsip-' . now()->format('Y-m-d_His') . '.xlsx';
+        $expectedName = 'log-aktivitas-arsip-'.now()->format('Y-m-d_His').'.xlsx';
         Excel::assertDownloaded($expectedName, function (ActivityLogExport $export) {
             return $export->collection()->count() === 1;
         });
     }
 }
-

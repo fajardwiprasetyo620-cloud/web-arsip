@@ -17,9 +17,9 @@ class KatalogBoxController extends Controller
     {
         $validator = Validator::make($request->query(), [
             'ruangan' => 'required|string|max:100',
-            'rak'     => 'required|string|max:50',
-            'baris'   => 'required|integer|min:1',
-            'box'     => 'required|string|max:50',
+            'rak' => 'required|string|max:50',
+            'baris' => 'required|integer|min:1',
+            'box' => 'required|string|max:50',
         ]);
 
         // Alamat tidak lengkap/salah -> "tidak ditemukan" (halaman publik, bukan redirect)

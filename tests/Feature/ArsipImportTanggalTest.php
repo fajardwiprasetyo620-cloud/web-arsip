@@ -18,10 +18,10 @@ class ArsipImportTanggalTest extends TestCase
         return array_merge([
             'kode_berkas' => 'IMP-001',
             'nama_berkas' => 'Berkas impor',
-            'ruangan'     => 'Ruang Arsip Kecil',
-            'rak'         => 'A',
-            'baris'       => 1,
-            'box'         => '3',
+            'ruangan' => 'Ruang Arsip Kecil',
+            'rak' => 'A',
+            'baris' => 1,
+            'box' => '3',
         ], $extra);
     }
 

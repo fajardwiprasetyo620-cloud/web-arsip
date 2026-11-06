@@ -30,11 +30,11 @@ class PeminjamanFlowTest extends TestCase
         $arsip = Arsip::factory()->create();
 
         $response = $this->actingAs($this->admin)->post(route('peminjaman.store'), [
-            'arsip_id'       => [$arsip->id],
-            'nama_peminjam'  => 'Budi Santoso',
-            'divisi'         => 'Kepesertaan',
+            'arsip_id' => [$arsip->id],
+            'nama_peminjam' => 'Budi Santoso',
+            'divisi' => 'Kepesertaan',
             'tanggal_pinjam' => now()->toDateString(),
-            'tenggat_waktu'  => now()->addDays(7)->toDateString(),
+            'tenggat_waktu' => now()->addDays(7)->toDateString(),
         ]);
 
         $response->assertRedirect(route('peminjaman.index'));
@@ -57,11 +57,11 @@ class PeminjamanFlowTest extends TestCase
         $peminjamanLama = Peminjaman::factory()->for($arsip, 'arsip')->create(['status' => 'Dipinjam']);
 
         $response = $this->actingAs($this->admin)->from(route('peminjaman.create'))->post(route('peminjaman.store'), [
-            'arsip_id'       => [$arsip->id],
-            'nama_peminjam'  => 'Siti Aminah',
-            'divisi'         => 'Klaim',
+            'arsip_id' => [$arsip->id],
+            'nama_peminjam' => 'Siti Aminah',
+            'divisi' => 'Klaim',
             'tanggal_pinjam' => now()->toDateString(),
-            'tenggat_waktu'  => now()->addDays(7)->toDateString(),
+            'tenggat_waktu' => now()->addDays(7)->toDateString(),
         ]);
 
         $response->assertSessionHasErrors('arsip_id');

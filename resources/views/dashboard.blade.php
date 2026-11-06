@@ -1,9 +1,16 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl sm:text-2xl text-white leading-tight flex items-center gap-2.5">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-            {{ __('Dashboard E-Arsip') }}
-        </h2>
+        <div class="flex items-center justify-between w-full">
+            <h2 class="font-semibold text-xl sm:text-2xl text-white leading-tight flex items-center gap-2.5">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                {{ __('Dashboard E-Arsip') }}
+            </h2>
+
+            <a href="{{ route('dashboard.executivePdf') }}" target="_blank" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs py-2 px-3.5 rounded-xl transition shadow-sm backdrop-blur-xs">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <span>Cetak Ringkasan Eksekutif (PDF)</span>
+            </a>
+        </div>
     </x-slot>
 
     {{-- Data disiapkan oleh DashboardController --}}
@@ -298,15 +305,32 @@
                                         <!-- Level Baris Shelf Visualizer -->
                                         <div class="space-y-1.5 my-3">
                                             @foreach($rakInfo['detail_baris'] as $nomorBaris => $barisDetail)
-                                                <div class="p-2 rounded text-xs border {{ $barisDetail['total_arsip'] > 0 ? 'bg-slate-50 border-gray-200 text-gray-800' : 'bg-gray-50/50 border-dashed border-gray-200 text-gray-400' }}">
+                                                <div class="p-2.5 rounded-lg text-xs border {{ $barisDetail['total_arsip'] > 0 ? 'bg-slate-50/90 border-slate-200 text-gray-800' : 'bg-gray-50/50 border-dashed border-gray-200 text-gray-400' }}">
                                                     <div class="flex items-center justify-between font-semibold">
-                                                        <span>Baris {{ $nomorBaris }}</span>
+                                                        <span class="flex items-center gap-1">
+                                                            <span class="w-2 h-2 rounded-full {{ $barisDetail['total_arsip'] > 0 ? 'bg-emerald-500' : 'bg-slate-300' }}"></span>
+                                                            <span>Baris {{ $nomorBaris }}</span>
+                                                        </span>
                                                         @if($barisDetail['total_arsip'] > 0)
                                                             <span class="text-[11px] text-emerald-700 font-bold">{{ $barisDetail['total_box'] }} Box &middot; {{ $barisDetail['total_arsip'] }} Berkas</span>
                                                         @else
-                                                            <span class="text-[10px] text-gray-400 italic">Kosong</span>
+                                                            <span class="text-[10px] text-gray-400 italic">Tersedia</span>
                                                         @endif
                                                     </div>
+
+                                                    @if($barisDetail['total_arsip'] > 0 && !empty($barisDetail['boxes']))
+                                                        <div class="flex flex-wrap gap-1 mt-2 pt-2 border-t border-slate-200/70">
+                                                            @foreach($barisDetail['boxes'] as $boxName)
+                                                                <a href="{{ route('katalog.box', ['ruangan' => $namaRuang, 'rak' => $namaRak, 'box' => $boxName]) }}" 
+                                                                   target="_blank"
+                                                                   title="Klik untuk membuka daftar berkas di dalam Box {{ $boxName }}" 
+                                                                   class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-white hover:bg-emerald-100 hover:text-emerald-900 border border-slate-200 text-slate-700 shadow-2xs transition">
+                                                                    <svg class="w-2.5 h-2.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z"></path><path fill-rule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
+                                                                    <span>Box {{ $boxName }}</span>
+                                                                </a>
+                                                            @endforeach
+                                                        </div>
+                                                    @endif
                                                 </div>
                                             @endforeach
                                         </div>

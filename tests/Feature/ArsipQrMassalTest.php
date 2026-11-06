@@ -68,7 +68,7 @@ class ArsipQrMassalTest extends TestCase
         // Alamat ditulis eksplisit (bukan dari APP_URL di .env), supaya hasil test
         // tidak berubah-ubah mengikuti isi .env masing-masing komputer.
         $url = 'http://web-arsip.test'
-            . route('arsip.qrcode.bulk', ['ids' => [$arsip->id]], false);
+            .route('arsip.qrcode.bulk', ['ids' => [$arsip->id]], false);
 
         $this->actingAs($admin)
             ->get($url)
@@ -82,7 +82,7 @@ class ArsipQrMassalTest extends TestCase
         $arsip = Arsip::factory()->create();
 
         $url = 'http://192.168.1.168:8000'
-            . route('arsip.qrcode.bulk', ['ids' => [$arsip->id]], false);
+            .route('arsip.qrcode.bulk', ['ids' => [$arsip->id]], false);
 
         $this->actingAs($admin)
             ->get($url)

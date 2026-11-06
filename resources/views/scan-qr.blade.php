@@ -59,7 +59,7 @@
 
                         <button type="button" onclick="document.getElementById('qr-input-file').click()" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2 text-sm">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            <span>Foto / Galeri HP</span>
+                            <span>Ambil Foto QR (Kamera HP)</span>
                         </button>
                     </div>
                 </div>
@@ -75,8 +75,8 @@
                 <div class="flex items-center justify-between gap-3">
                     <label class="text-xs font-semibold text-slate-600 flex items-center gap-1.5 cursor-pointer hover:text-emerald-700">
                         <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        <span>Scan dari Galeri / File</span>
-                        <input type="file" id="qr-input-file" accept="image/*" class="hidden" onchange="scanFromFile(event)">
+                        <span>Potret / Unggah QR</span>
+                        <input type="file" id="qr-input-file" accept="image/*" capture="environment" class="hidden" onchange="scanFromFile(event)">
                     </label>
 
                     <button type="button" id="btn-stop" onclick="stopScanner()" class="hidden text-xs text-rose-600 hover:text-rose-800 font-bold py-1 px-2.5 rounded transition">
@@ -106,12 +106,22 @@
     <script>
         let html5QrCode = null;
 
-        function startScanner() {
+        async function startScanner() {
             const placeholder = document.getElementById('scanner-placeholder');
             const btnStop = document.getElementById('btn-stop');
 
             if (!window.Html5Qrcode) {
-                alert('Modul scanner sedang dimuat, silakan coba sesaat lagi.');
+                if (window.tampilkanAlert) {
+                    tampilkanAlert('Memuat Modul', 'Modul pemindai kamera sedang dimuat, silakan coba 1 detik lagi.', 'info');
+                } else if (window.Swal) {
+                    Swal.fire({
+                        title: 'Memuat Modul',
+                        text: 'Modul pemindai kamera sedang dimuat, silakan coba 1 detik lagi.',
+                        icon: 'info',
+                    });
+                } else {
+                    alert('Modul scanner sedang dimuat, silakan coba sesaat lagi.');
+                }
                 return;
             }
 
@@ -125,53 +135,73 @@
                 aspectRatio: 1.0
             };
 
-            html5QrCode.start(
-                { facingMode: "environment" },
-                config,
-                onScanSuccess,
-                onScanFailure
-            ).then(() => {
+            try {
+                // Deteksi daftar kamera hardware yang terpasang (kompatibel untuk webcam laptop & HP)
+                const devices = await window.Html5Qrcode.getCameras().catch(() => []);
+                
+                if (devices && devices.length > 0) {
+                    // Jika di HP, prioritaskan kamera belakang (environment/back)
+                    let selectedCamId = devices[0].id;
+                    for (const cam of devices) {
+                        if (/back|rear|environment/i.test(cam.label)) {
+                            selectedCamId = cam.id;
+                            break;
+                        }
+                    }
+                    await html5QrCode.start(selectedCamId, config, onScanSuccess, onScanFailure);
+                } else {
+                    // Fallback jika enumerasi kamera tidak didukung
+                    try {
+                        await html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure);
+                    } catch {
+                        await html5QrCode.start({ facingMode: "user" }, config, onScanSuccess, onScanFailure);
+                    }
+                }
+
                 placeholder.classList.add('hidden');
                 btnStop.classList.remove('hidden');
-            }).catch(err => {
+            } catch (err) {
                 console.error("Gagal membuka kamera:", err);
                 const errMsg = err.message || String(err);
 
                 if (!window.isSecureContext) {
-                    if (window.Swal) {
-                        Swal.fire({
-                            title: 'Kamera live memerlukan koneksi aman',
-                            text: 'Browser biasanya membatasi akses kamera pada alamat HTTP melalui IP lokal. Coba HTTPS atau localhost, atau pilih foto QR jika fitur tersebut didukung perangkat.',
+                    const pesanHttp = `
+                        <div class="text-left text-xs text-slate-600 space-y-2.5">
+                            <p>Browser (Chrome/Safari) secara otomatis membatasi streaming video kamera langsung pada alamat HTTP melalui IP lokal (<code>${window.location.origin}</code>).</p>
+                            <div class="bg-amber-50 border border-amber-200 rounded-xl p-2.5 text-amber-900">
+                                <p class="font-bold mb-1">Pilihan Cara Scan di HP:</p>
+                                <ul class="list-disc pl-4 space-y-1">
+                                    <li><strong>Opsi Cepat:</strong> Klik tombol hijau di bawah untuk <strong>langsung memotret QR dengan kamera HP</strong> Anda.</li>
+                                    <li><strong>Opsi Live:</strong> Buka web lewat <code>http://localhost:8000</code> di laptop, atau aktifkan izin IP di <code>chrome://flags/#unsafely-treat-insecure-origin-as-secure</code> pada Chrome HP.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+
+                    if (window.AppDialog) {
+                        AppDialog.confirm({
+                            title: 'Izin Kamera Browser',
+                            html: pesanHttp,
                             icon: 'info',
-                            showCancelButton: true,
-                            confirmButtonColor: '#059669',
-                            cancelButtonColor: '#94a3b8',
-                            confirmButtonText: 'Ambil Foto QR',
-                            cancelButtonText: 'Tutup',
-                            customClass: { popup: 'rounded-2xl' }
+                            confirmText: 'Ambil Foto QR Sekarang',
+                            cancelText: 'Tutup',
                         }).then((result) => {
                             if (result.isConfirmed) {
                                 document.getElementById('qr-input-file').click();
                             }
                         });
                     } else {
-                        alert("Kamera live biasanya memerlukan HTTPS atau localhost. Anda dapat mencoba scan dari foto jika fitur tersebut didukung perangkat.");
+                        alert("Kamera live memerlukan HTTPS atau localhost. Silakan gunakan tombol ambil foto.");
                     }
                 } else {
-                    const message = `Tidak dapat membuka kamera (${errMsg}). Periksa izin kamera browser dan pastikan kamera tidak sedang digunakan aplikasi lain. Anda juga dapat mencoba scan dari foto.`;
-                    if (window.Swal) {
-                        Swal.fire({
-                            title: 'Kamera tidak tersedia',
-                            text: message,
-                            icon: 'warning',
-                            confirmButtonColor: '#059669',
-                            customClass: { popup: 'rounded-2xl' }
-                        });
+                    const message = `Tidak dapat membuka kamera (${errMsg}). Pastikan izin kamera browser telah diaktifkan dan kamera tidak sedang digunakan aplikasi lain.`;
+                    if (window.tampilkanAlert) {
+                        tampilkanAlert('Kamera Tidak Tersedia', message, 'warning');
                     } else {
                         alert(message);
                     }
                 }
-            });
+            }
         }
 
         function stopScanner() {
@@ -183,7 +213,36 @@
             }
         }
 
+        function playScanBeep() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const audioCtx = new AudioCtx();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(1046.5, audioCtx.currentTime); // Nada C6 jernih
+                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.12);
+
+                if (navigator.vibrate) {
+                    navigator.vibrate(80);
+                }
+            } catch (e) {
+                // Abaikan jika browser memblokir audio autoplay
+            }
+        }
+
         function onScanSuccess(decodedText) {
+            playScanBeep();
+
             const statusBox = document.getElementById('scan-status');
             const statusText = document.getElementById('scan-status-text');
 
@@ -223,14 +282,8 @@
                     onScanSuccess(decodedText);
                 })
                 .catch(err => {
-                    if (window.Swal) {
-                        Swal.fire({
-                            title: 'QR Tidak Terdeteksi',
-                            text: 'QR Code tidak terbaca dari gambar ini. Pastikan foto cukup jelas, tegak, dan tidak buram.',
-                            icon: 'warning',
-                            confirmButtonColor: '#059669',
-                            customClass: { popup: 'rounded-2xl' }
-                        });
+                    if (window.tampilkanAlert) {
+                        tampilkanAlert('QR Tidak Terdeteksi', 'QR Code tidak terbaca dari gambar ini. Pastikan foto cukup jelas, tegak, dan tidak buram.', 'warning');
                     } else {
                         alert("QR Code tidak terbaca dari gambar ini. Pastikan gambar cukup jelas.");
                     }

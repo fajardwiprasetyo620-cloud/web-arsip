@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('activity_logs', function (Blueprint $table) {
             $table->id();
-            // Kita simpan nama langsung (bukan ID) agar log tetap bisa dibaca 
+            // Kita simpan nama langsung (bukan ID) agar log tetap bisa dibaca
             // meskipun akun admin tersebut suatu saat dihapus.
-            $table->string('user_name'); 
+            $table->string('user_name');
             $table->string('action'); // Contoh: 'TAMBAH', 'EDIT', 'HAPUS'
             $table->text('description'); // Contoh: 'Fajar memindahkan arsip dari Rak A ke Rak B'
             $table->timestamps();

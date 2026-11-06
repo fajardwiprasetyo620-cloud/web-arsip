@@ -15,9 +15,9 @@ class KatalogBoxTest extends TestCase
 
     private array $lokasi = [
         'ruangan' => 'Ruang Arsip Kecil',
-        'rak'     => 'A',
-        'baris'   => 3,
-        'box'     => '3',
+        'rak' => 'A',
+        'baris' => 3,
+        'box' => '3',
     ];
 
     public function test_menampilkan_semua_berkas_di_box_tanpa_login(): void

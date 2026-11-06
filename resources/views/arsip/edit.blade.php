@@ -13,7 +13,7 @@
                     
                     <x-flash />
 
-                    <form action="{{ route('arsip.update', $arsip->id) }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('arsip.update', $arsip->id) }}" method="POST" enctype="multipart/form-data" onsubmit="AppDialog.loading('Memperbarui Data Arsip...', 'Sedang menyimpan perubahan data arsip...')">
                         @csrf
                         @method('PUT')
                         

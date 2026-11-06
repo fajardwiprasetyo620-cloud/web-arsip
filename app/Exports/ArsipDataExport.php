@@ -9,7 +9,7 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class ArsipDataExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize
+class ArsipDataExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping
 {
     protected ?array $filter;
 
@@ -24,6 +24,7 @@ class ArsipDataExport implements FromCollection, WithHeadings, WithMapping, Shou
         if ($this->filter) {
             $query->filter($this->filter);
         }
+
         return $query->orderBy('kode_berkas')->get();
     }
 
@@ -62,4 +63,3 @@ class ArsipDataExport implements FromCollection, WithHeadings, WithMapping, Shou
         ];
     }
 }
-

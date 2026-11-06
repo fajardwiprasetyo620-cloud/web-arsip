@@ -27,7 +27,7 @@ class ArsipExportController extends Controller
     {
         $ids = $request->ids ?? $request->arsip_ids;
 
-        if (!$ids || empty($ids)) {
+        if (! $ids || empty($ids)) {
             return redirect()->back()->with('error', 'Pilih minimal satu data arsip untuk dicetak!');
         }
 
@@ -41,7 +41,7 @@ class ArsipExportController extends Controller
     public function excel(Request $request)
     {
         $filter = $request->only('search', 'ruangan', 'status', 'digital');
-        $namaFile = 'Data_Arsip_' . now()->format('Ymd_His') . '.xlsx';
+        $namaFile = 'Data_Arsip_'.now()->format('Ymd_His').'.xlsx';
 
         return Excel::download(new ArsipDataExport($filter), $namaFile);
     }

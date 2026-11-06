@@ -237,7 +237,13 @@
             <td>
                 <div>Yang Menerima,</div>
                 <div style="font-size: 8.5pt; color: #64748b;">(Peminjam Berkas)</div>
-                <div class="ttd-space"></div>
+                @if(!empty($first->tanda_tangan))
+                    <div style="height: 55px; margin: 4px auto; text-align: center;">
+                        <img src="{{ $first->tanda_tangan }}" style="max-height: 52px; max-width: 140px; display: inline-block;">
+                    </div>
+                @else
+                    <div class="ttd-space"></div>
+                @endif
                 <div class="ttd-nama">{{ $first->nama_peminjam }}</div>
                 <div class="ttd-jabatan">{{ $first->divisi }}</div>
             </td>

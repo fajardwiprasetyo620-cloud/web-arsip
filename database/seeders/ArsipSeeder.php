@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class ArsipSeeder extends Seeder
 {
@@ -12,11 +12,11 @@ class ArsipSeeder extends Seeder
     {
         // 1. Matikan sementara pengecekan relasi (Foreign Key)
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        
+
         // 2. Bersihkan tabel peminjaman dan arsip dari data lama
         DB::table('peminjamans')->truncate();
         DB::table('arsips')->truncate();
-        
+
         // 3. Nyalakan kembali pengecekan relasi
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 

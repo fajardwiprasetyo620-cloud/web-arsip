@@ -11,6 +11,9 @@
                 showConfirmButton: false,
                 timer: 3500,
                 timerProgressBar: true,
+                customClass: {
+                    popup: 'rounded-xl shadow-xl border border-slate-100 font-sans text-sm',
+                },
                 didOpen: (toast) => {
                     toast.onmouseenter = Swal.stopTimer;
                     toast.onmouseleave = Swal.resumeTimer;

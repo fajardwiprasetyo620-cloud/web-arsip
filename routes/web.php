@@ -23,12 +23,15 @@ Route::get('/dashboard', DashboardController::class)
     ->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/dashboard/executive-pdf', [DashboardController::class, 'executivePdf'])->name('dashboard.executivePdf');
+
     // Profil Admin
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Rute Kustom Arsip
+    Route::get('/arsip/quick-search', [ArsipController::class, 'quickSearch'])->name('arsip.quickSearch');
     Route::post('/arsip/import', [ArsipImportController::class, 'import'])->name('arsip.import');
     Route::get('/arsip/template-excel', [ArsipImportController::class, 'template'])->name('arsip.template');
     Route::get('/arsip/riwayat/hapus', [ArsipController::class, 'history'])->name('arsip.history');

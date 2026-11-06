@@ -21,7 +21,7 @@ class PeminjamanUrutanTerlambatTest extends TestCase
         $terlambatLama = Peminjaman::factory()->terlambat()->create([
             'nama_peminjam' => 'Budi',
             'tenggat_waktu' => now()->subDays(9)->toDateString(),
-            'created_at'    => now()->subDays(2),
+            'created_at' => now()->subDays(2),
         ]);
         $terlambatBaru = Peminjaman::factory()->terlambat()->create([
             'nama_peminjam' => 'Andi',
@@ -41,13 +41,13 @@ class PeminjamanUrutanTerlambatTest extends TestCase
 
         $terlambat = Peminjaman::factory()->terlambat()->create([
             'nama_peminjam' => 'Budi',
-            'created_at'    => now()->subDays(2),
+            'created_at' => now()->subDays(2),
         ]);
         $dikembalikan = Peminjaman::factory()->dikembalikan()->create([
-            'nama_peminjam'  => 'Cici',
+            'nama_peminjam' => 'Cici',
             'tanggal_pinjam' => now()->subDays(10)->toDateString(),
-            'tenggat_waktu'  => now()->subDays(3)->toDateString(),
-            'created_at'     => now(),
+            'tenggat_waktu' => now()->subDays(3)->toDateString(),
+            'created_at' => now(),
         ]);
 
         $response = $this->actingAs($admin)->get(route('peminjaman.index'));

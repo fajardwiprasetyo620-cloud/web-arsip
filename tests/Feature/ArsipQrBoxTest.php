@@ -18,9 +18,9 @@ class ArsipQrBoxTest extends TestCase
     {
         return Arsip::factory()->create(array_merge([
             'ruangan' => 'Ruang Arsip Kecil',
-            'rak'     => 'A',
-            'baris'   => 3,
-            'box'     => $box,
+            'rak' => 'A',
+            'baris' => 3,
+            'box' => $box,
         ], $extra));
     }
 

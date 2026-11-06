@@ -104,6 +104,13 @@
                                 <option value="sudah" {{ request('digital') == 'sudah' ? 'selected' : '' }}>Sudah Scan PDF</option>
                                 <option value="belum" {{ request('digital') == 'belum' ? 'selected' : '' }}>Hanya Fisik</option>
                             </select>
+
+                            <select name="retensi" class="border-gray-300 text-gray-700 text-sm rounded-lg shadow-2xs py-2.5 pl-3.5 pr-8 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white font-medium cursor-pointer">
+                                <option value="">Semua Retensi JRA</option>
+                                <option value="aktif" {{ request('retensi') == 'aktif' ? 'selected' : '' }}>Arsip Aktif (&le; 2 Th)</option>
+                                <option value="inaktif" {{ request('retensi') == 'inaktif' ? 'selected' : '' }}>Arsip Inaktif (2-5 Th)</option>
+                                <option value="jatuh_tempo" {{ request('retensi') == 'jatuh_tempo' ? 'selected' : '' }}>Jatuh Tempo (&gt; 5 Th)</option>
+                            </select>
                         </div>
 
                         <!-- Kotak Input Pencarian -->
@@ -165,21 +172,24 @@
                                 <td class="py-3 px-4 font-bold text-sm text-emerald-700 whitespace-nowrap">{{ $arsip->kode_berkas }}</td>
                                 <td class="py-3 px-4 text-sm text-gray-800 leading-snug">
                                     <div class="font-medium text-gray-900">{{ $arsip->nama_berkas }}</div>
-                                    @if($arsip->file_dokumen)
-                                        <div class="mt-1">
+                                    <div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+                                        @if($arsip->file_dokumen)
                                             <a href="{{ route('arsip.file', $arsip) }}" target="_blank" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition shadow-2xs" title="Lihat dokumen digital">
                                                 <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                                                 <span>PDF Scan</span>
                                             </a>
-                                        </div>
-                                    @else
-                                        <div class="mt-1">
+                                        @else
                                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-gray-50 text-gray-400 border border-gray-200" title="Belum memiliki lampiran file digital">
                                                 <svg class="w-3 h-3 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                                 <span>Fisik Saja</span>
                                             </span>
-                                        </div>
-                                    @endif
+                                        @endif
+
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold border {{ $arsip->status_retensi_badge }}" title="Siklus Jadwal Retensi Arsip (JRA): Umur {{ $arsip->umur_tahun }} Tahun">
+                                            <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            <span>{{ $arsip->status_retensi }} ({{ $arsip->umur_tahun }} th)</span>
+                                        </span>
+                                    </div>
                                 </td>
                                 
                                 <td class="py-3 px-4">
@@ -243,7 +253,7 @@
                                         <form action="{{ route('arsip.destroy', $arsip->id) }}" method="POST" class="inline-block m-0">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg shadow-sm transition border border-rose-200" title="Hapus Arsip" onclick="return confirm('Yakin ingin menghapus arsip ini?')">
+                                            <button type="button" class="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg shadow-sm transition border border-rose-200" title="Hapus Arsip" onclick="konfirmasiHapus(event, 'Arsip {{ $arsip->kode_berkas }} akan dipindahkan ke Riwayat Terhapus.', this.closest('form'))">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                             </button>
                                         </form>
@@ -290,7 +300,7 @@
                     </a>
                 </div>
 
-                <form action="{{ route('arsip.import') }}" method="POST" enctype="multipart/form-data" x-data="{ loading: false }" @submit="loading = true">
+                <form action="{{ route('arsip.import') }}" method="POST" enctype="multipart/form-data" x-data="{ loading: false }" @submit="loading = true; AppDialog.loading('Mengimpor Data Excel...', 'Sedang membaca dan memvalidasi file Excel...')">
                     @csrf
                     <div class="mb-2">
                         <label class="block text-gray-700 text-sm font-bold mb-2">Pilih File untuk Diunggah</label>
@@ -338,13 +348,19 @@
                 </div>
 
                 <!-- Konten Modal: PDF iframe atau Gambar -->
-                <div class="flex-1 bg-slate-100 p-2 sm:p-4 flex items-center justify-center overflow-auto">
+                <div class="flex-1 bg-slate-100 p-2 sm:p-4 flex items-center justify-center overflow-auto relative">
                     <template x-if="isPdf && previewUrl">
                         <iframe :src="previewUrl" class="w-full h-full rounded-xl border border-gray-200 bg-white shadow-inner"></iframe>
                     </template>
                     <template x-if="!isPdf && previewUrl">
                         <img :src="previewUrl" class="max-w-full max-h-full object-contain rounded-xl shadow-md border border-gray-200 bg-white" alt="Preview Dokumen">
                     </template>
+
+                    <!-- Security Watermark Badge -->
+                    <div class="absolute bottom-5 left-1/2 -translate-x-1/2 pointer-events-none px-4 py-1.5 rounded-full bg-slate-900/85 text-white/95 text-[11px] font-medium backdrop-blur-md shadow-xl flex items-center gap-2 border border-white/20 select-none z-10">
+                        <svg class="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        <span>DOKUMEN RAHASIA BPJS KETENAGAKERJAAN &bull; DIAKSES OLEH {{ Auth::user()->name }} &bull; {{ now()->translatedFormat('d M Y H:i') }} WIB</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -395,30 +411,40 @@
 
         function submitBulkDelete() {
             const checkedBoxes = document.querySelectorAll('.arsip-checkbox:checked');
-            if(checkedBoxes.length === 0) return;
+            if(checkedBoxes.length === 0) {
+                tampilkanAlert('Pilih Data Arsip', 'Silakan pilih minimal satu arsip terlebih dahulu untuk dihapus.', 'warning');
+                return;
+            }
 
-            if(!confirm(`Yakin ingin memindahkan ${checkedBoxes.length} arsip ke riwayat hapus?`)) return;
-            
-            const bulkDeleteForm = document.getElementById('bulkDeleteForm');
-            const hiddenInputsContainer = document.getElementById('hiddenInputsContainer');
-            hiddenInputsContainer.innerHTML = ''; 
-            
-            checkedBoxes.forEach(cb => {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'ids[]';
-                input.value = cb.value;
-                hiddenInputsContainer.appendChild(input);
+            AppDialog.confirmDelete({
+                title: 'Hapus Massal Arsip?',
+                text: `Apakah Anda yakin ingin memindahkan ${checkedBoxes.length} arsip terpilih ke Riwayat Terhapus?`,
+                confirmText: `Ya, Hapus ${checkedBoxes.length} Arsip`,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    AppDialog.loading('Menghapus Data Massal...', 'Memindahkan arsip terpilih ke riwayat...');
+                    const bulkDeleteForm = document.getElementById('bulkDeleteForm');
+                    const hiddenInputsContainer = document.getElementById('hiddenInputsContainer');
+                    hiddenInputsContainer.innerHTML = ''; 
+                    
+                    checkedBoxes.forEach(cb => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'ids[]';
+                        input.value = cb.value;
+                        hiddenInputsContainer.appendChild(input);
+                    });
+                    
+                    bulkDeleteForm.submit();
+                }
             });
-            
-            bulkDeleteForm.submit();
         }
 
         function cetakArsipTerpilih() {
             const checkedBoxes = document.querySelectorAll('.arsip-checkbox:checked');
             
             if(checkedBoxes.length === 0) {
-                alert('Tolong ceklis minimal satu arsip terlebih dahulu!');
+                tampilkanAlert('Pilih Data Arsip', 'Tolong ceklis minimal satu arsip terlebih dahulu!', 'warning');
                 return;
             }
             

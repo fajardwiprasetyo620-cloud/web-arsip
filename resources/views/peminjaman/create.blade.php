@@ -31,7 +31,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('peminjaman.store') }}" method="POST">
+                    <form id="form-peminjaman" action="{{ route('peminjaman.store') }}" method="POST" onsubmit="return handlePeminjamanSubmit(event)">
                         @csrf
                         
                         <div class="mb-5">
@@ -63,10 +63,34 @@
                             <input type="date" name="tanggal_pinjam" value="{{ old('tanggal_pinjam', \Carbon\Carbon::now()->format('Y-m-d')) }}" required class="w-full border-gray-300 text-sm text-gray-700 rounded-lg shadow-sm py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition duration-200">
                         </div>
 
-                        <div class="mb-4">
+                        <div class="mb-5">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Batas Waktu Pengembalian</label>
                             <input type="date" name="tenggat_waktu" value="{{ old('tenggat_waktu') }}" required class="w-full border-gray-300 text-sm text-gray-700 rounded-lg shadow-sm py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:outline-none transition duration-200">
                             <p class="text-xs text-gray-500 mt-1">Tentukan maksimal tanggal arsip ini harus dikembalikan.</p>
+                        </div>
+
+                        <!-- Tanda Tangan Digital Peminjam (Signature Pad) -->
+                        <div class="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200">
+                            <div class="flex items-center justify-between mb-2">
+                                <div>
+                                    <label class="block text-gray-800 text-sm font-bold flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                        <span>Tanda Tangan Peminjam (Opsional / Digital)</span>
+                                    </label>
+                                    <p class="text-xs text-gray-500 mt-0.5">Bubuhkan tanda tangan peminjam di layar ini untuk dicantumkan otomatis pada Berita Acara (BAP).</p>
+                                </div>
+                                <button type="button" onclick="clearSignature()" class="px-2.5 py-1 text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 border border-rose-200 rounded-lg transition" title="Hapus tanda tangan">
+                                    Hapus / Reset
+                                </button>
+                            </div>
+
+                            <div class="relative w-full bg-white rounded-lg border-2 border-dashed border-slate-300 overflow-hidden cursor-crosshair">
+                                <canvas id="signature-pad" class="w-full h-36 block touch-none"></canvas>
+                                <div id="signature-guide" class="pointer-events-none absolute bottom-4 left-6 right-6 border-b border-slate-200 text-center pb-1">
+                                    <span class="text-[11px] text-slate-400 select-none">( Tanda Tangan Peminjam di Sini )</span>
+                                </div>
+                            </div>
+                            <input type="hidden" name="tanda_tangan" id="tanda_tangan_input">
                         </div>
 
                         <div class="flex items-center justify-end gap-4 pt-4 border-t border-gray-100">
@@ -86,8 +110,14 @@
 
     <!-- Tom Select sudah dimuat lewat resources/js/app.js (npm), tidak lagi dari CDN -->
     <script>
+        let tomSelectInstance = null;
+        let sigCanvas = null;
+        let sigCtx = null;
+        let isDrawing = false;
+        let hasSignature = false;
+
         document.addEventListener('DOMContentLoaded', function () {
-            new TomSelect('#arsip-select', {
+            tomSelectInstance = new TomSelect('#arsip-select', {
                 plugins: ['remove_button'], 
                 create: false,
                 sortField: {
@@ -96,6 +126,104 @@
                 },
                 placeholder: 'Ketik Kode, Nama Arsip, atau Lokasi Rak...'
             });
+
+            initSignaturePad();
         });
+
+        function initSignaturePad() {
+            sigCanvas = document.getElementById('signature-pad');
+            if (!sigCanvas) return;
+            sigCtx = sigCanvas.getContext('2d');
+
+            // Set resolusi internal canvas sesuai dimensi tampilannya
+            function resizeCanvas() {
+                const rect = sigCanvas.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+                sigCanvas.width = rect.width * dpr;
+                sigCanvas.height = rect.height * dpr;
+                sigCtx.scale(dpr, dpr);
+                sigCtx.strokeStyle = '#0f172a';
+                sigCtx.lineWidth = 2.2;
+                sigCtx.lineCap = 'round';
+                sigCtx.lineJoin = 'round';
+            }
+
+            resizeCanvas();
+            window.addEventListener('resize', () => {
+                // Jangan reset jika sudah ada tanda tangan
+                if (!hasSignature) resizeCanvas();
+            });
+
+            function getPos(e) {
+                const rect = sigCanvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            }
+
+            function startDraw(e) {
+                isDrawing = true;
+                const pos = getPos(e);
+                sigCtx.beginPath();
+                sigCtx.moveTo(pos.x, pos.y);
+                document.getElementById('signature-guide').style.opacity = '0.3';
+            }
+
+            function draw(e) {
+                if (!isDrawing) return;
+                e.preventDefault();
+                const pos = getPos(e);
+                sigCtx.lineTo(pos.x, pos.y);
+                sigCtx.stroke();
+                hasSignature = true;
+            }
+
+            function stopDraw() {
+                if (isDrawing) {
+                    sigCtx.closePath();
+                    isDrawing = false;
+                }
+            }
+
+            // Mouse Events
+            sigCanvas.addEventListener('mousedown', startDraw);
+            sigCanvas.addEventListener('mousemove', draw);
+            window.addEventListener('mouseup', stopDraw);
+
+            // Touch Events (HP / Tablet / Layar Sentuh)
+            sigCanvas.addEventListener('touchstart', startDraw, { passive: false });
+            sigCanvas.addEventListener('touchmove', draw, { passive: false });
+            sigCanvas.addEventListener('touchend', stopDraw);
+        }
+
+        function clearSignature() {
+            if (!sigCanvas || !sigCtx) return;
+            const dpr = window.devicePixelRatio || 1;
+            sigCtx.clearRect(0, 0, sigCanvas.width / dpr, sigCanvas.height / dpr);
+            hasSignature = false;
+            document.getElementById('tanda_tangan_input').value = '';
+            document.getElementById('signature-guide').style.opacity = '1';
+        }
+
+        function handlePeminjamanSubmit(event) {
+            const select = document.getElementById('arsip-select');
+            const values = tomSelectInstance ? tomSelectInstance.getValue() : (select ? Array.from(select.selectedOptions).map(o => o.value) : []);
+            
+            if (!values || (Array.isArray(values) && values.length === 0) || values === '') {
+                event.preventDefault();
+                tampilkanAlert('Pilih Data Arsip', 'Silakan pilih minimal satu berkas arsip yang akan dipinjam.', 'warning');
+                return false;
+            }
+
+            if (hasSignature && sigCanvas) {
+                document.getElementById('tanda_tangan_input').value = sigCanvas.toDataURL('image/png');
+            }
+
+            AppDialog.loading('Mencatat Peminjaman...', 'Sedang menyimpan data peminjaman arsip...');
+            return true;
+        }
     </script>
 </x-app-layout>
