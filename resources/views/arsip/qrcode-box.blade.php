@@ -42,12 +42,29 @@
         $hostSaatIni = request()->getHost();
         $alamatLokal = str_ends_with($hostSaatIni, '.test')
             || in_array($hostSaatIni, ['localhost', '127.0.0.1', '::1'], true);
+
+        $lanIp = gethostbyname(gethostname());
+        $pakaiIp = request()->boolean('use_ip') || request('ip') !== null;
+        $customIp = request('ip') ?: $lanIp;
+
+        $targetBoxUrl = function($b) use ($pakaiIp, $customIp) {
+            $params = [
+                'ruangan' => $b->ruangan,
+                'rak'     => $b->rak,
+                'baris'   => $b->baris,
+                'box'     => $b->box,
+            ];
+            if ($pakaiIp) {
+                return "http://{$customIp}/web-arsip/public/box?" . http_build_query($params);
+            }
+            return route('katalog.box', $params);
+        };
     @endphp
 
     <div class="toolbar">
         <div>
             <h1>Cetak QR Box &mdash; {{ $boxes->count() }} stiker</h1>
-            <p>Alamat yang tertanam di QR: <code>{{ url('/') }}/box?...</code></p>
+            <p>Alamat yang tertanam di QR: <code>{{ $pakaiIp ? "http://{$customIp}/web-arsip/public/box?..." : url('/box?...') }}</code></p>
             <p>Satu stiker per box. Tempel di bagian depan box; saat di-scan akan tampil semua berkas di dalam box itu. Tips cetak: A4, skala 100%, matikan &quot;Headers and footers&quot;. Satu lembar muat sekitar 9 stiker.</p>
             <p>Rentang tanggal dihitung dari data saat ini. Cetak setelah isi map lengkap, atau cetak ulang kalau ada berkas baru yang tanggalnya di luar rentang.</p>
             @if ($alamatLokal)
@@ -55,6 +72,20 @@
                     Alamat ini hanya dikenal oleh komputer ini, jadi QR yang dicetak tidak akan terbuka dari HP.
                     Untuk HP, buka halaman ini lewat alamat IP laptop (misalnya http://192.168.x.x:8000), lalu cetak ulang.
                 </p>
+                <div style="margin-top: 8px;">
+                    @if ($pakaiIp)
+                        <span style="display: inline-block; background: #059669; color: white; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 12px; margin-right: 8px;">
+                            ✓ QR memakai IP: {{ $customIp }} (Bisa di-scan dari HP)
+                        </span>
+                        <a href="{{ request()->fullUrlWithQuery(['use_ip' => null, 'ip' => null]) }}" style="color: #4b5563; font-size: 11px; text-decoration: underline;">
+                            Kembalikan ke Alamat Standar (.test)
+                        </a>
+                    @else
+                        <a href="{{ request()->fullUrlWithQuery(['use_ip' => 1]) }}" style="display: inline-block; background: #059669; color: white; padding: 6px 12px; border-radius: 6px; font-weight: bold; text-decoration: none; font-size: 12px;">
+                            📱 Ubah QR ke IP Laptop ({{ $lanIp }}) agar Bisa di-Scan dari HP
+                        </a>
+                    @endif
+                </div>
             @endif
         </div>
         <button class="print-btn" onclick="window.print()">Cetak {{ $boxes->count() }} Stiker</button>
@@ -65,12 +96,7 @@
             @php
                 $awal  = $b->tanggal_awal ? \Carbon\Carbon::parse($b->tanggal_awal)->format('d/m/Y') : null;
                 $akhir = $b->tanggal_akhir ? \Carbon\Carbon::parse($b->tanggal_akhir)->format('d/m/Y') : null;
-                $url = route('katalog.box', [
-                    'ruangan' => $b->ruangan,
-                    'rak'     => $b->rak,
-                    'baris'   => $b->baris,
-                    'box'     => $b->box,
-                ]);
+                $url = $targetBoxUrl($b);
             @endphp
             <div class="label">
                 <div class="header">E-ARSIP BPJS</div>

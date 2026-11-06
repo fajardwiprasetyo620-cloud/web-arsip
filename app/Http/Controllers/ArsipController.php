@@ -259,11 +259,23 @@ class ArsipController extends Controller
         return $redirect;
     }
 
-    public function printQr(Arsip $arsip)
+    public function printQr(Request $request, Arsip $arsip)
     {
-        $url = route('katalog.show', $arsip->id);
+        $pakaiIp = $request->boolean('use_ip') || $request->has('ip');
+        $lanIp = gethostbyname(gethostname());
+        $customIp = $request->get('ip') ?: $lanIp;
 
-        return view('arsip.qrcode', compact('arsip', 'url'));
+        $hostSaatIni = $request->getHost();
+        $alamatLokal = str_ends_with($hostSaatIni, '.test')
+            || in_array($hostSaatIni, ['localhost', '127.0.0.1', '::1'], true);
+
+        if ($pakaiIp) {
+            $url = "http://{$customIp}/web-arsip/public/katalog/{$arsip->id}";
+        } else {
+            $url = route('katalog.show', $arsip->id);
+        }
+
+        return view('arsip.qrcode', compact('arsip', 'url', 'lanIp', 'pakaiIp', 'customIp', 'alamatLokal'));
     }
 
     /**

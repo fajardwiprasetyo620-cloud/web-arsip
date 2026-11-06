@@ -309,6 +309,26 @@
 
         setTimeout(() => {
             if (decodedText.startsWith('http://') || decodedText.startsWith('https://')) {
+                try {
+                    const scannedUrl = new URL(decodedText);
+                    // Jika QR memuat domain lokal (.test atau localhost) padahal browser HP sedang mengakses via IP LAN:
+                    // Otomatis arahkan ke origin browser HP saat ini agar tidak terjadi error DNS NXDOMAIN
+                    const isLocalDomain = scannedUrl.hostname.endsWith('.test') || 
+                                          scannedUrl.hostname === 'localhost' || 
+                                          scannedUrl.hostname === '127.0.0.1';
+
+                    if (isLocalDomain && window.location.hostname !== scannedUrl.hostname) {
+                        const currentBasePath = window.location.pathname.includes('/web-arsip/public') 
+                            ? '/web-arsip/public' 
+                            : '';
+                        const targetPath = scannedUrl.pathname.replace(/^\/web-arsip\/public/, '');
+                        window.location.href = window.location.origin + currentBasePath + targetPath + scannedUrl.search;
+                        return;
+                    }
+                } catch (e) {
+                    console.warn("Gagal parse URL QR:", e);
+                }
+
                 window.location.href = decodedText;
             } else {
                 window.location.href = "{{ route('katalog.index') }}?search=" + encodeURIComponent(decodedText);
